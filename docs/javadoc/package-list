@@ -1,0 +1,13 @@
+com.github.okamumu.jspetrinet
+com.github.okamumu.jspetrinet.analysis
+com.github.okamumu.jspetrinet.ast
+com.github.okamumu.jspetrinet.ast.dist
+com.github.okamumu.jspetrinet.ast.operators
+com.github.okamumu.jspetrinet.ast.values
+com.github.okamumu.jspetrinet.exception
+com.github.okamumu.jspetrinet.graph
+com.github.okamumu.jspetrinet.marking
+com.github.okamumu.jspetrinet.petri
+com.github.okamumu.jspetrinet.petri.arcs
+com.github.okamumu.jspetrinet.petri.ast
+com.github.okamumu.jspetrinet.petri.nodes

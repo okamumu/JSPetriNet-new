@@ -1,0 +1,19 @@
+# Java
+*.class
+*.jar
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build
+bin
+!gradle-wrapper.jar
+.settings
+.classpath
+.project
+.python-version
+*.dot
+*.pdf
+src/main/antlr/com/github/okamumu/jspetrinet/.antlr
+*.mat
