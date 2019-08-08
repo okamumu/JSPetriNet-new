@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import com.github.okamumu.jspetrinet.ast.AST;
 import com.github.okamumu.jspetrinet.ast.ASTEnv;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
+import com.github.okamumu.jspetrinet.exception.InvalidValue;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
+import com.github.okamumu.jspetrinet.exception.UnknownOption;
+import com.github.okamumu.jspetrinet.exception.UnknownPolicy;
 import com.github.okamumu.jspetrinet.petri.arcs.InArc;
 import com.github.okamumu.jspetrinet.petri.arcs.InhibitArc;
 import com.github.okamumu.jspetrinet.petri.arcs.OutArc;
@@ -81,18 +85,22 @@ public class FactoryPN {
 		/**
 		 * Constructor
 		 */
-		Node() {
+		public Node() {
 			options = new HashMap<String,Object>();
 		}
 		
-		/**
-		 * A method to get an object
-		 * @param key A string for a key
-		 * @param value A default value, which is used when the given key does not exist.
-		 * @return An object
-		 */
-		public Object getOrDefault(String key, Object value) {
-			return options.getOrDefault(key, value);
+//		/**
+//		 * A method to get an object
+//		 * @param key A string for a key
+//		 * @param value A default value, which is used when the given key does not exist.
+//		 * @return An object
+//		 */
+//		public Object getOrDefault(String key, Object value) {
+//			return options.getOrDefault(key, value);
+//		}
+		
+		public Set<Map.Entry<String,Object>> getOptEntry() {
+			return options.entrySet();
 		}
 		
 		/**
@@ -103,66 +111,84 @@ public class FactoryPN {
 		public void put(String key, Object value) {
 			options.put(key, value);
 		}
+
+		/**
+		 * Get a string for a type of node
+		 * @return A string
+		 */
+		public String getType() {
+			return (String) options.getOrDefault("type", null);
+		}
+
+		/**
+		 * Setter for a type of node
+		 * @param string A name of type
+		 */
+		public void setType(String string) {
+			options.put("type", string);
+		}
+	}
+	
+	private Integer evalInteger(Object f, ASTEnv env) throws ASTException {
+		Object obj = ((AST) f).eval(env);
+		if (obj instanceof Integer) {
+			return (Integer) obj;
+		} else if (obj instanceof Double) {
+			return ((Double) obj).intValue();
+		} else {
+			throw new InvalidValue("Object " + f + " cannot convert to Integer");
+		}
 	}
 
-	/**
-	 * A class for the definition of place
-	 *
-	 */
-	public class DefPlace extends Node {}
+//	private Double evalDouble(Object f, ASTEnv env) throws ASTException {
+//		Object obj = ((AST) f).eval(env);
+//		if (obj instanceof Integer) {
+//			return ((Integer) obj).doubleValue();
+//		} else if (obj instanceof Double) {
+//			return (Double) obj;
+//		} else {
+//			throw new InvalidValue("Object " + f + " cannot convert to Double");
+//		}
+//	}
 
-	/**
-	 * A class for the definition of ImmTrans
-	 *
-	 */
-	public class DefImmTrans extends Node {}
-
-	/**
-	 * A class for the definition of ExpTrans
-	 *
-	 */
-	public class DefExpTrans extends Node {}
-
-	/**
-	 * A class for the definition of GenTrans
-	 *
-	 */
-	public class DefGenTrans extends Node {}
-
-	/**
-	 * A class for the definition of Arc
-	 *
-	 */
-	public class DefArc extends Node {}
-
-	/**
-	 * A class for the definition of InhibitArc
-	 *
-	 */
-	public class DefInhibitArc extends Node {}
-
-	/**
-	 * A class for the definition of AST
-	 *
-	 */
-	public class DefAST extends Node {}
-
-	/**
-	 * A class for the definition of reward
-	 *
-	 */
-	public class DefReward extends Node {}
+	private Boolean evalBoolean(Object f, ASTEnv env) throws ASTException {
+		Object obj = ((AST) f).eval(env);
+		if (obj instanceof Boolean) {
+			return (Boolean) obj;
+		} else {
+			throw new InvalidValue("Object " + f + " cannot convert to Boolean");
+		}
+	}
 
 	/**
 	 * A method to create an instance of Place from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment
-	 * @param definition An instance of DefPlace
+	 * @param definition A definition of place
 	 * @return An instance of Place
+	 * @throws ASTException 
+	 * @throws InvalidDefinition 
 	 */
-	private Place create(ASTEnv env, DefPlace definition) {
-		String label = (String) definition.getOrDefault("label", String.valueOf(placeid));
-		int max = (Integer) definition.getOrDefault("max", Byte.MAX_VALUE - 1);
+	private Place createPlace(ASTEnv env, Node definition) throws ASTException, InvalidDefinition {
+		// default values
+		String label = String.valueOf(placeid);
+		int init = 0;
+		int max = Byte.MAX_VALUE - 1;
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "label":
+				label = (String) entry.getValue();
+				break;
+			case "init":
+				init = evalInteger(entry.getValue(), env);
+				break;
+			case "max":
+				max = evalInteger(entry.getValue(), env);
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Place:" + label);
+			}
+		}
 		Place elem = new Place(label, placeid, max);
 		placeid++;
 		logger.trace("{} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getMax());
@@ -173,16 +199,43 @@ public class FactoryPN {
 	 * A method to create an instance of ImmTrans from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment
-	 * @param definition An instance of DefImmTrans
+	 * @param definition A definition of immtrans
 	 * @return An instance of ImmTrans
+	 * @throws ASTException 
+	 * @throws InvalidDefinition 
 	 */
-	private ImmTrans create(ASTEnv env, DefImmTrans definition) {
-		String label = (String) definition.getOrDefault("label", String.valueOf(immtransid+exptransid+gentransid));
-		AST weight = (AST) definition.getOrDefault("weight", ASTValue.getAST(1.0));
-		AST guard = (AST) definition.getOrDefault("guard", ASTValue.getAST(true));
-		AST update = (AST) definition.getOrDefault("update", ASTValue.getAST(null));
-		int priority = (Integer) definition.getOrDefault("priority", 0);
-		boolean vanishable = (Boolean) definition.getOrDefault("vanishable", true);
+	private ImmTrans createImmTrans(ASTEnv env, Node definition) throws ASTException, InvalidDefinition {
+		// default values
+		String label = String.valueOf(immtransid+exptransid+gentransid);
+		AST weight = ASTValue.getAST(1.0);
+		AST guard = ASTValue.getAST(true);
+		AST update = ASTValue.getAST(null);
+		int priority = 0;
+		boolean vanishable = true;
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "label":
+				label = (String) entry.getValue();
+				break;
+			case "weight":
+				weight = (AST) entry.getValue();
+				break;
+			case "guard":
+				guard = (AST) entry.getValue();
+				break;
+			case "update":
+				update = (AST) entry.getValue();
+				break;
+			case "priority":
+				priority = evalInteger(entry.getValue(), env);
+				break;
+			case "vanishable":
+				vanishable = evalBoolean(entry.getValue(), env);
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in IMM:" + label);
+			}
+		}
 		ImmTrans elem = new ImmTrans(label, immtransid, weight, guard, update, priority, vanishable);
 		immtransid++;
 		logger.trace("{} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getWeight().toString(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
@@ -193,16 +246,42 @@ public class FactoryPN {
 	 * A method to create an instance of ExpTrans from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment
-	 * @param definition An instance of DefPlace
+	 * @param definition A definition of exptrans
 	 * @return An instance of ExpTrans
+	 * @throws ASTException 
+	 * @throws InvalidDefinition 
 	 */
-	private ExpTrans create(ASTEnv env, DefExpTrans definition) {
-		String label = (String) definition.getOrDefault("label", String.valueOf(immtransid+exptransid+gentransid));
-		AST rate = (AST) definition.getOrDefault("rate", ASTValue.getAST(1.0));
-		AST guard = (AST) definition.getOrDefault("guard", ASTValue.getAST(true));
-		AST update = (AST) definition.getOrDefault("update", ASTValue.getAST(null));
-		int priority = (Integer) definition.getOrDefault("priority", 0);
-		boolean vanishable = (Boolean) definition.getOrDefault("vanishable", false);
+	private ExpTrans createExpTrans(ASTEnv env, Node definition) throws ASTException, InvalidDefinition {
+		String label = String.valueOf(immtransid+exptransid+gentransid);
+		AST rate = ASTValue.getAST(1.0);
+		AST guard = ASTValue.getAST(true);
+		AST update = ASTValue.getAST(null);
+		int priority = 0;
+		boolean vanishable = true;
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "label":
+				label = (String) entry.getValue();
+				break;
+			case "rate":
+				rate = (AST) entry.getValue();
+				break;
+			case "guard":
+				guard = (AST) entry.getValue();
+				break;
+			case "update":
+				update = (AST) entry.getValue();
+				break;
+			case "priority":
+				priority = evalInteger(entry.getValue(), env);
+				break;
+			case "vanishable":
+				vanishable = evalBoolean(entry.getValue(), env);
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in EXP:" + label);
+			}
+		}
 		ExpTrans elem = new ExpTrans(label, exptransid, rate, guard, update, priority, vanishable);
 		exptransid++;
 		logger.trace("{} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getRate().toString(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
@@ -213,18 +292,58 @@ public class FactoryPN {
 	 * A method to create an instance of GenTrans from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment
-	 * @param definition An instance of DefGenTrans
+	 * @param definition A definition of gentrans
 	 * @return An instance of GenTrans
+	 * @throws ASTException 
+	 * @throws InvalidDefinition 
 	 */
-	private GenTrans create(ASTEnv env, DefGenTrans definition) {
-		String label = (String) definition.getOrDefault("label", String.valueOf(immtransid+exptransid+gentransid));
-		AST dist = (AST) definition.getOrDefault("dist", ASTValue.getAST(null));
-		GenTrans.Policy policy = (GenTrans.Policy) definition.getOrDefault("policy", GenTrans.Policy.PRD);
-		AST guard = (AST) definition.getOrDefault("guard", ASTValue.getAST(true));
-		AST update = (AST) definition.getOrDefault("update", ASTValue.getAST(null));
-		int priority = (Integer) definition.getOrDefault("priority", 0);
-		boolean vanishable = (Boolean) definition.getOrDefault("vanishable", false);
-		GenTrans elem = new GenTrans(label, gentransid, dist, policy, guard, update, priority, vanishable);
+	private GenTrans createGenTrans(ASTEnv env, Node definition) throws ASTException, InvalidDefinition {
+		String label = String.valueOf(immtransid+exptransid+gentransid);
+		AST dist = ASTValue.getAST(null);
+		String policy = "prd";
+		AST guard = ASTValue.getAST(true);
+		AST update = ASTValue.getAST(null);
+		int priority = 0;
+		boolean vanishable = true;
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "label":
+				label = (String) entry.getValue();
+				break;
+			case "dist":
+				dist = (AST) entry.getValue();
+				break;
+			case "guard":
+				guard = (AST) entry.getValue();
+				break;
+			case "update":
+				update = (AST) entry.getValue();
+				break;
+			case "priority":
+				priority = evalInteger(entry.getValue(), env);
+				break;
+			case "vanishable":
+				vanishable = evalBoolean(entry.getValue(), env);
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in GEN:" + label);
+			}
+		}
+		GenTrans.Policy pol;
+		switch (policy) {
+		case "prd":
+			pol = GenTrans.Policy.PRD;
+			break;
+		case "prs":
+			pol = GenTrans.Policy.PRS;
+			break;
+		case "pri":
+			pol = GenTrans.Policy.PRI;
+			break;
+		default:
+			throw new InvalidDefinition("Policy " + policy + " is unknown in GEN:" + label);
+		}
+		GenTrans elem = new GenTrans(label, gentransid, dist, pol, guard, update, priority, vanishable);
 		gentransid++;
 		logger.trace("{} {} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getDist().toString(), elem.getPolicy(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
 		return elem;
@@ -235,13 +354,31 @@ public class FactoryPN {
 	 * The default values are determined in this method.
 	 * This method automatically decides the corresponding arc is inbound or outbound.
 	 * @param env An object of environment. env should include instances of Place and Trans to be connected.
-	 * @param definition An instance of DefArc
+	 * @param definition A definition of arc
 	 * @return An instance of Arc
+	 * @throws InvalidDefinition 
+	 * @throws ObjectNotFoundInASTEnv 
 	 */
-	private Object create(ASTEnv env, DefArc definition) throws ObjectNotFoundInASTEnv, InvalidDefinition {
-		String src = (String) definition.getOrDefault("src", null);
-		String dest = (String) definition.getOrDefault("dest", null);
-		AST multi = (AST) definition.getOrDefault("multi", ASTValue.getAST(1));
+	private Object createArc(ASTEnv env, Node definition) throws InvalidDefinition, ObjectNotFoundInASTEnv {
+		// default values
+		String src = null;
+		String dest = null;
+		AST multi = ASTValue.getAST(1);
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "src":
+				src = (String) entry.getValue();
+				break;
+			case "dest":
+				dest = (String) entry.getValue();
+				break;
+			case "multi":
+				multi = (AST) entry.getValue();
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Arc:" + src + "->" + dest);
+			}
+		}
 		Object sobj = env.get(src);
 		Object dobj = env.get(dest);
 		Object elem;
@@ -266,15 +403,32 @@ public class FactoryPN {
 	 * A method to create an instance of InhibitArc from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment. env should include instances of Place and Trans to be connected.
-	 * @param definition An instance of DefInhibitArc
+	 * @param definition A definition of inhibited arc
 	 * @return An instance of InhibitArc
+	 * @throws InvalidDefinition 
 	 */
-	private InhibitArc create(ASTEnv env, DefInhibitArc definition) throws ObjectNotFoundInASTEnv {
-		String src = (String) definition.getOrDefault("src", null);
-		String dest = (String) definition.getOrDefault("dest", null);
+	private InhibitArc createHArc(ASTEnv env, Node definition) throws ObjectNotFoundInASTEnv, InvalidDefinition {
+		// default values
+		String src = null;
+		String dest = null;
+		AST multi = ASTValue.getAST(1);
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "src":
+				src = (String) entry.getValue();
+				break;
+			case "dest":
+				dest = (String) entry.getValue();
+				break;
+			case "multi":
+				multi = (AST) entry.getValue();
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in HArc:" + src + "->" + dest);
+			}
+		}
 		Place place = (Place) env.get(src);
 		Trans trans = (Trans) env.get(dest);
-		AST multi = (AST) definition.getOrDefault("multi", ASTValue.getAST(1));
 		InhibitArc elem = new InhibitArc(place, trans, multi);
 		logger.trace("harc {} -> {} ({})", place.getLabel(), trans.getLabel(), multi.toString());
 		return elem;
@@ -298,13 +452,26 @@ public class FactoryPN {
 	 * A method to create an instance of AST as reward from the definition.
 	 * The default values are determined in this method.
 	 * @param env An object of environment.
-	 * @param definition An instance of reward
+	 * @param definition A definition of reward
 	 * @return An instance of AST as reward
 	 * @throws ASTException 
+	 * @throws InvalidDefinition 
 	 */
-	private Reward create(ASTEnv env, DefReward definition) throws ASTException {
-		String label = (String) definition.getOrDefault("label", String.valueOf(rewardid));
-		AST f = (AST) definition.getOrDefault("formula", ASTValue.getAST(1));
+	private Reward createReward(ASTEnv env, Node definition) throws ASTException, InvalidDefinition {
+		String label = String.valueOf(rewardid);
+		AST f = ASTValue.getAST(1);
+		for (Map.Entry<String,Object> entry : definition.getOptEntry()) {
+			switch (entry.getKey()) {
+			case "label":
+				label = (String) entry.getValue();
+				break;
+			case "formula":
+				f = (AST) entry.getValue();
+				break;
+			default:
+				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Reward:" + label);
+			}
+		}		
 		Reward rwd = new Reward(label, ASTValue.getAST(f.eval(env)));
 		logger.trace("reward {} ({})", label, f.toString());
 		rewardid++;
@@ -337,36 +504,60 @@ public class FactoryPN {
         // create nodes and AST
         for(String label : keys) {
         	Object obj = env.get(label);
-        	if (obj instanceof DefPlace) {
-        		Place node = FactoryPN.getInstance().create(env, (DefPlace) obj);
-        		place.add(node);
-        		env.put(node.getLabel(), node); // replace definition by an instance
-        	} else if (obj instanceof DefImmTrans) {
-        		ImmTrans node = FactoryPN.getInstance().create(env, (DefImmTrans) obj);
-        		immtrans.add(node);
-        		env.put(node.getLabel(), node); // replace definition by an instance
-        	} else if (obj instanceof DefExpTrans) {
-        		ExpTrans node = FactoryPN.getInstance().create(env, (DefExpTrans) obj);
-        		exptrans.add(node);
-        		env.put(node.getLabel(), node); // replace definition by an instance
-        	} else if (obj instanceof DefGenTrans) {
-        		GenTrans node = FactoryPN.getInstance().create(env, (DefGenTrans) obj);
-        		gentrans.add(node);
-        		env.put(node.getLabel(), node); // replace definition by an instance
-        	} else if (obj instanceof DefReward) {
-        		Reward rwd = FactoryPN.getInstance().create(env, (DefReward) obj);
-        		rewards.add(rwd.label);
-        		env.put(rwd.label, rwd.f); // replace definition of reward by AST
+        	if (obj instanceof Node) {
+        		Node defnode = (Node) obj;
+        		String type = defnode.getType();
+        		switch (type) {
+        		case "place": {
+            		Place node = createPlace(env, defnode);
+            		place.add(node);
+            		env.put(node.getLabel(), node); // replace definition by an instance
+        			break;
+        		}
+        		case "imm": {
+            		ImmTrans node = createImmTrans(env, defnode);
+            		immtrans.add(node);
+            		env.put(node.getLabel(), node); // replace definition by an instance
+        			break;
+        		}
+        		case "exp": {
+            		ExpTrans node = createExpTrans(env, defnode);
+            		exptrans.add(node);
+            		env.put(node.getLabel(), node); // replace definition by an instance
+        			break;
+        		}
+        		case "gen": {
+            		GenTrans node = createGenTrans(env, defnode);
+            		gentrans.add(node);
+            		env.put(node.getLabel(), node); // replace definition by an instance
+        			break;
+        		}
+        		case "reward": {
+            		Reward rwd = createReward(env, defnode);
+            		rewards.add(rwd.label);
+            		env.put(rwd.label, rwd.f); // replace definition of reward by AST
+        			break;
+        		}
+        		default:
+        		}
         	}
 		}
         
         // create arcs
         for(String label : keys) {
         	Object obj = env.get(label);
-        	if (obj instanceof DefArc) {
-        		FactoryPN.getInstance().create(env, (DefArc) obj);
-        	} else if (obj instanceof DefInhibitArc) {
-        		FactoryPN.getInstance().create(env, (DefInhibitArc) obj);
+        	if (obj instanceof Node) {
+        		Node defnode = (Node) obj;
+        		String type = defnode.getType();
+        		switch (type) {
+        		case "arc":
+            		createArc(env, (Node) obj);
+        			break;
+        		case "harc":
+            		createHArc(env, (Node) obj);
+        			break;
+        		default:
+        		}
         	}
 		}
         

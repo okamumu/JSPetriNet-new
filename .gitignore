@@ -17,3 +17,4 @@ bin
 *.pdf
 src/main/antlr/com/github/okamumu/jspetrinet/.antlr
 *.mat
+src/main/antlr/com/github/okamumu/jspetrinet/parser/.antlr

@@ -35,9 +35,7 @@ import com.github.okamumu.jspetrinet.matrix.ASTVector;
 import com.github.okamumu.jspetrinet.matrix.GTuple;
 import com.github.okamumu.jspetrinet.matrix.MarkingMatrix;
 import com.github.okamumu.jspetrinet.petri.*;
-import com.github.okamumu.jspetrinet.petri.FactoryPN.DefArc;
-import com.github.okamumu.jspetrinet.petri.FactoryPN.DefImmTrans;
-import com.github.okamumu.jspetrinet.petri.FactoryPN.DefPlace;
+import com.github.okamumu.jspetrinet.petri.FactoryPN.Node;
 import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.writer.MarkWriter;
 import com.github.okamumu.jspetrinet.writer.MatlabMatrixWriter;
@@ -58,35 +56,42 @@ public class PetriNetMarkingTest3 {
     	factory.reset();
     	FactoryPN.Node node;
 
-    	node = factory.new DefPlace();
+    	node = factory.new Node();
+    	node.put("type", "place");
     	node.put("label", "PService");
     	env.put("PService", node);
 
-    	node = factory.new DefExpTrans();
+    	node = factory.new Node();
+    	node.put("type", "exp");
     	node.put("label", "TArrival");
-    	node.put("rate", ASTValue.getAST(0.5));
+    	node.put("rate", ASTValue.getAST(0.1));
     	node.put("guard", new ASTComparator(new ASTNToken("PService"), ASTValue.getAST(10), "<="));
     	env.put("TArrival", node);
-    	node = factory.new DefGenTrans();
+    	node = factory.new Node();
+    	node.put("type", "exp");
     	node.put("label", "TService");
-    	node.put("dist", new ConstDist(ASTValue.getAST(0.2)));
+    	node.put("rate", new ASTArithmetic(new ASTNToken("PService"), ASTValue.getAST(1.0), "*"));
     	env.put("TService", node);
 
-    	node = factory.new DefArc();
+    	node = factory.new Node();
+    	node.put("type", "arc");
     	node.put("src", "TArrival");
     	node.put("dest", "PService");
     	env.put(node);
-    	node = factory.new DefArc();
+    	node = factory.new Node();
+    	node.put("type", "arc");
     	node.put("src", "PService");
     	node.put("dest", "TService");
     	env.put(node);
     	
-    	node = factory.new DefReward();
+    	node = factory.new Node();
+    	node.put("type", "reward");
     	node.put("label", "reward1");
     	node.put("formula", new ASTIfThenElse(new ASTComparator(new ASTNToken("PService"), ASTValue.getAST(5), ">="), ASTValue.getAST(1), ASTValue.getAST(0)));
     	env.put(node);
 
-    	node = factory.new DefReward();
+    	node = factory.new Node();
+    	node.put("type", "reward");
     	node.put("label", "reward2");
     	node.put("formula", new ASTIfThenElse(new ASTEnableCond("TArrival"), ASTValue.getAST(1), ASTValue.getAST(0)));
     	env.put(node);

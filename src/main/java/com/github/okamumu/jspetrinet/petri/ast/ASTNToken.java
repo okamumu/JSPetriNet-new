@@ -28,6 +28,14 @@ public class ASTNToken implements AST {
 		this.label = label;
 		this.analysis = PetriAnalysis.getInstance();
 	}
+
+	/**
+	 * Getter for the label
+	 * @return A string
+	 */
+	public String getLabel() {
+		return label;
+	}
 	
 	@Override
 	public Object eval(ASTEnv env) throws ASTException {
