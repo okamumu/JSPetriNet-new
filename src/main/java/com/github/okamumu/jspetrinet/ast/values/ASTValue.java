@@ -20,7 +20,8 @@ public final class ASTValue implements AST {
 		}
 		if (obj instanceof Integer
 				|| obj instanceof Double
-				|| obj instanceof Boolean) {
+				|| obj instanceof Boolean
+				|| obj instanceof String) {
 			return new ASTValue(obj);
 		}
 		if (obj instanceof NaN) {
@@ -58,6 +59,16 @@ public final class ASTValue implements AST {
 	public static AST getAST(boolean value) {
 		return new ASTValue(new Boolean(value));
 	}
+	
+	/**
+	 * A static method to convert a value of fundamental types to an object of AST
+	 * @param value A value of string
+	 * @return An object of AST that wraps the value
+	 */
+
+//	public static AST getAST(String value) {
+//		return new ASTValue(value);
+//	}
 	
 	/**
 	 * A constructor. This is a private method. An instance should be created by a factory getAST method.

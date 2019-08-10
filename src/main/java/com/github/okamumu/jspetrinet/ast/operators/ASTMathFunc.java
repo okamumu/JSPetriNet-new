@@ -75,7 +75,11 @@ public class ASTMathFunc implements AST {
 
 	@Override
 	public String toString() {
-		return func + "(" + this.arg.toString() + ")";
+		ArrayList<String> args = new ArrayList<String>();
+		for (AST a : arg) {
+			args.add(a.toString());
+		}
+		return func + "(" + String.join(",", args) + ")";
 	}
 
 	private final Object exp(ArrayList<Object> res) throws InvalidOperation {

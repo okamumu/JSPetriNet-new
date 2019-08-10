@@ -33,7 +33,7 @@ public class ExpDist extends Dist {
 
 	@Override
 	public String toString() {
-		return dname + "(" + rateObj + ")";
+		return dname + "(" + rate + ")";
 	}
 
 	@Override

@@ -9,7 +9,7 @@ import com.github.okamumu.jspetrinet.exception.ASTException;
  *
  */
 
-public final class ASTNull implements AST {
+public class ASTNull implements AST {
 
 	public ASTNull() {}
 	

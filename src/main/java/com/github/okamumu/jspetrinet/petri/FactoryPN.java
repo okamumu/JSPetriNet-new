@@ -98,7 +98,19 @@ public class FactoryPN {
 //		public Object getOrDefault(String key, Object value) {
 //			return options.getOrDefault(key, value);
 //		}
+
+		/**
+		 * Get a size of options
+		 * @return A size
+		 */
+		public int size() {
+			return options.size();
+		}
 		
+		/**
+		 * Method to get the entry set of options
+		 * @return A set of entries
+		 */
 		public Set<Map.Entry<String,Object>> getOptEntry() {
 			return options.entrySet();
 		}
@@ -160,6 +172,15 @@ public class FactoryPN {
 		}
 	}
 
+	private String evalString(Object f, ASTEnv env) throws ASTException {
+		Object obj = ((AST) f).eval(env);
+		if (obj instanceof String) {
+			return (String) obj;
+		} else {
+			throw new InvalidValue("Object " + f + " cannot convert to String");
+		}
+	}
+
 	/**
 	 * A method to create an instance of Place from the definition.
 	 * The default values are determined in this method.
@@ -184,6 +205,8 @@ public class FactoryPN {
 				break;
 			case "max":
 				max = evalInteger(entry.getValue(), env);
+				break;
+			case "type":
 				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Place:" + label);
@@ -232,6 +255,8 @@ public class FactoryPN {
 			case "vanishable":
 				vanishable = evalBoolean(entry.getValue(), env);
 				break;
+			case "type":
+				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in IMM:" + label);
 			}
@@ -278,6 +303,8 @@ public class FactoryPN {
 			case "vanishable":
 				vanishable = evalBoolean(entry.getValue(), env);
 				break;
+			case "type":
+				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in EXP:" + label);
 			}
@@ -319,11 +346,16 @@ public class FactoryPN {
 			case "update":
 				update = (AST) entry.getValue();
 				break;
+			case "policy":
+				policy = evalString(entry.getValue(), env);
+				break;
 			case "priority":
 				priority = evalInteger(entry.getValue(), env);
 				break;
 			case "vanishable":
 				vanishable = evalBoolean(entry.getValue(), env);
+				break;
+			case "type":
 				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in GEN:" + label);
@@ -375,6 +407,8 @@ public class FactoryPN {
 			case "multi":
 				multi = (AST) entry.getValue();
 				break;
+			case "type":
+				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Arc:" + src + "->" + dest);
 			}
@@ -423,6 +457,8 @@ public class FactoryPN {
 			case "multi":
 				multi = (AST) entry.getValue();
 				break;
+			case "type":
+				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in HArc:" + src + "->" + dest);
 			}
@@ -467,6 +503,8 @@ public class FactoryPN {
 				break;
 			case "formula":
 				f = (AST) entry.getValue();
+				break;
+			case "type":
 				break;
 			default:
 				throw new InvalidDefinition("Option " + entry.getKey() + " is unknown in Reward:" + label);

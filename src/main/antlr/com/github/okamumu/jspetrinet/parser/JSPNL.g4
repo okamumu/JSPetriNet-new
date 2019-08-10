@@ -13,43 +13,51 @@ statement
     | simple
     ;
 
-simple_block
-    : (NEWLINE)* '{' (simple)? (NEWLINE (simple)?)* '}'
-    ;
-
 // declaration
 
 declaration
     : node_declaration
     | arc_declaration
-    | assert_declaration
+    | reward_declaration
     ;
 
 node_declaration
-    : node='place' id=ID ('(' option_list ')')?
-    | node='trans' id=ID ('(' option_list ')')? (simple_block)?
-    | node=ID id=ID ('(' option_list ')')? (simple_block)?
+    : node='place' id=ID (node_options)?
+    | node='trans' id=ID (node_options)? (update_block)?
+    | node=ID id=ID (node_options)? (update_block)?
     ;
 
 arc_declaration
-    : type=('arc'|'iarc'|'oarc'|'harc') srcName=ID 'to' destName=ID ('(' option_list ')')?
+    : type=('arc'|'iarc'|'oarc'|'harc') srcName=ID 'to' destName=ID (node_options)?
     ;
 
-assert_declaration
-    : 'assert' (expression | simple_block)
+reward_declaration
+    : 'reward' id=ID expression
     ;
 
-// option
+node_options
+    : '(' option_list ')'
+    ;
 
 option_list
     : option_value (',' option_list)*
     ;
 
 option_value
-    : assign_expression
+    : label_expression
     ;
 
-// simple
+label_expression
+    : id=ID '=' expression
+    ;
+
+update_block
+    : simple_block
+    ;
+
+simple_block
+    : (NEWLINE)* '{' (simple)? (NEWLINE (simple)?)* '}'
+    ;
 
 simple
     : assign_expression
@@ -60,8 +68,7 @@ simple
 
 assign_expression returns [int type]
     : id=ID '=' expression { $type = 1; }
-    | id=ID ':=' expression { $type = 2; }
-    | ntoken_expression '=' expression { $type = 3; }
+    | ntoken_expression '=' expression { $type = 2; }
     ;
 
 // expression
@@ -86,17 +93,21 @@ expression returns [int type]
 // function_expression
 
 function_expression
-    : id=ID '(' arg_list ')'
+    : id=ID '(' function_args ')'
     ;
 
+function_args
+    : args_list
+    | option_list
+    ;
 // arg
 
-arg_list
-    : arg_value (',' arg_list)*
+args_list
+    : args_value (',' args_list)*
     ;
 
-arg_value
-    : val=expression
+args_value
+    : expression
     ;
 
 // ntoken

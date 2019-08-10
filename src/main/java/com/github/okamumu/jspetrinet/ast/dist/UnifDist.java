@@ -37,7 +37,7 @@ public class UnifDist extends Dist {
 
 	@Override
 	public String toString() {
-		return dname + "(" + minObj + "," + maxObj + ")";
+		return dname + "(" + min + "," + max + ")";
 	}
 
 	@Override

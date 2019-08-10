@@ -28,7 +28,7 @@ public class ConstDist extends Dist {
 
 	@Override
 	public String toString() {
-		return dname + "(" + constValueObj + ")";
+		return dname + "(" + constValue + ")";
 	}
 
 	@Override
