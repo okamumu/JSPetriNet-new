@@ -15,6 +15,7 @@ import com.github.okamumu.jspetrinet.exception.InvalidValue;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
 import com.github.okamumu.jspetrinet.exception.UnknownOption;
 import com.github.okamumu.jspetrinet.exception.UnknownPolicy;
+import com.github.okamumu.jspetrinet.marking.Mark;
 import com.github.okamumu.jspetrinet.petri.arcs.InArc;
 import com.github.okamumu.jspetrinet.petri.arcs.InhibitArc;
 import com.github.okamumu.jspetrinet.petri.arcs.OutArc;
@@ -38,6 +39,8 @@ public class FactoryPN {
 	private int exptransid;
 	private int gentransid;
 	private int rewardid;
+	
+	private ArrayList<Integer> initMark;
 	
 	private Logger logger;
 
@@ -71,6 +74,7 @@ public class FactoryPN {
 		exptransid = 0;
 		gentransid = 0;
 		rewardid = 0;
+		initMark = new ArrayList<Integer>();
 	}
 
 	/**
@@ -213,6 +217,7 @@ public class FactoryPN {
 			}
 		}
 		Place elem = new Place(label, placeid, max);
+		initMark.add(init);
 		placeid++;
 		logger.trace("{} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getMax());
 		return elem;
@@ -599,10 +604,16 @@ public class FactoryPN {
         	}
 		}
         
+        // create init
+        int[] vec = new int [place.size()];
+        for (int i=0; i<vec.length; i++) {
+        	vec[i] = initMark.get(i);
+        }
+        
         Collections.sort(immtrans);
         Collections.sort(exptrans);
         Collections.sort(gentrans);
         Collections.sort(rewards);
-        return new Net(place, immtrans, exptrans, gentrans, rewards);
+        return new Net(new Mark(vec), place, immtrans, exptrans, gentrans, rewards);
 	}
 }

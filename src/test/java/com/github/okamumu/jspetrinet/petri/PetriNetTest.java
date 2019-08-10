@@ -42,7 +42,7 @@ public class PetriNetTest {
     	new OutArc(imm.get(0), places.get(1), ASTValue.getAST(1));
     	new OutArc(imm.get(1), places.get(2), ASTValue.getAST(1));
     	new OutArc(imm.get(2), places.get(0), ASTValue.getAST(1));
-    	net = new Net(places, imm, exp, gen, null);
+    	net = new Net(null, places, imm, exp, gen, null);
     }
 
     @Test

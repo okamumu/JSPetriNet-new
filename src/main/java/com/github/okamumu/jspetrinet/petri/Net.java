@@ -1,6 +1,8 @@
 package com.github.okamumu.jspetrinet.petri;
 
 import java.util.List;
+
+import com.github.okamumu.jspetrinet.marking.Mark;
 import com.github.okamumu.jspetrinet.petri.nodes.*;
 
 /**
@@ -11,6 +13,7 @@ import com.github.okamumu.jspetrinet.petri.nodes.*;
 
 public class Net {
 
+	private final Mark init;
 	private final List<Place> placeList;
 	private final List<ImmTrans> immTransList;
 	private final List<ExpTrans> expTransList;
@@ -19,20 +22,30 @@ public class Net {
 
 	/**
 	 * Constructor
+	 * @param init An initial mark
 	 * @param placeList A list of places
 	 * @param immTransList A list of imm trans
 	 * @param expTransList A list of exp trans
 	 * @param genTransList A list of gen trans
 	 * @param rewardList A map of AST as reward functions
 	 */
-	public Net(List<Place> placeList, List<ImmTrans> immTransList,
+	public Net(Mark init, List<Place> placeList, List<ImmTrans> immTransList,
 			List<ExpTrans> expTransList, List<GenTrans> genTransList,
 			List<String> rewardList) {
+		this.init = init;
 		this.placeList = placeList;
 		this.immTransList = immTransList;
 		this.expTransList = expTransList;
 		this.genTransList = genTransList;
 		this.rewardList = rewardList;
+	}
+
+	/**
+	 * Getter for an initial marking
+	 * @return An instance of initial marking
+	 */
+	public Mark getInitMark() {
+		return init;
 	}
 
 	/**

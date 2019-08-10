@@ -22,6 +22,7 @@ import com.github.okamumu.jspetrinet.ast.operators.ASTMathFunc;
 import com.github.okamumu.jspetrinet.ast.operators.ASTUnary;
 import com.github.okamumu.jspetrinet.ast.values.ASTNull;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
+import com.github.okamumu.jspetrinet.ast.values.ASTVariable;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
@@ -32,8 +33,7 @@ import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
 public class NetBuilder {
 
-	static public Net build(InputStream in) {
-		Env env = new Env();
+	static public Net build(InputStream in, ASTEnv env) {
 		NetBuilder builder = new NetBuilder(env);
 		try {
 			builder.parseProg(in);
@@ -48,8 +48,7 @@ public class NetBuilder {
 		return null;
 	}
 
-	static public Net build(String in) {
-		Env env = new Env();
+	static public Net build(String in, ASTEnv env) {
 		NetBuilder builder = new NetBuilder(env);
 		builder.parseProg(in);
 		try {
@@ -72,7 +71,7 @@ public class NetBuilder {
 	private final LinkedList<AST> stack;
 	private final ASTEnv env;
 	private final FactoryPN factory;
-	private FactoryPN.Node node;
+	private final LinkedList<FactoryPN.Node> node;
 
 	private NetBuilder(ASTEnv env) {
 		this.env = env;
@@ -80,6 +79,7 @@ public class NetBuilder {
         factory = FactoryPN.getInstance();
     	factory.reset();
     	stack = new LinkedList<AST>();
+    	node = new LinkedList<FactoryPN.Node>();
 	}
 	
 	private void parseProg(InputStream in) throws IOException {
@@ -102,50 +102,50 @@ public class NetBuilder {
 	public void setNodeOption() {
 		AST right = stack.pop();
 		String label = "arg" + node.size();
-		node.put(label, right);
+		node.peek().put(label, right);
 		logger.trace("Set option {}: {}", label, right);
 	}
 	
 	public void setNodeOption(String label) {
 		AST right = stack.pop();
-		node.put(label, right);
+		node.peek().put(label, right);
 		logger.trace("Set option {}: {}", label, right);
 	}
 	
 	public void createNewNode() {
-		node = factory.new Node();
+		node.push(factory.new Node());
 		logger.trace("Create a new option node");
 	}
 
 	public void buildNode(String type, String label) {
 		switch (type) {
 		case "place":
-			node.setType("place");
-			node.put("label", label);
+			node.peek().setType("place");
+			node.peek().put("label", label);
 			logger.trace("Create a place {}: label", label);
 			break;
 		case "imm":
-			node.setType("imm");
-			node.put("label", label);
+			node.peek().setType("imm");
+			node.peek().put("label", label);
 			logger.trace("Create an imm {}: label", label);
 			break;
 		case "exp":
-			node.setType("exp");
-			node.put("label", label);
+			node.peek().setType("exp");
+			node.peek().put("label", label);
 			logger.trace("Create an exp {}: label", label);
 			break;
 		case "gen":
-			node.setType("gen");
-			node.put("label", label);
+			node.peek().setType("gen");
+			node.peek().put("label", label);
 			logger.trace("Create a gen {}: label", label);
 			break;
 		case "trans":
-			node.put("label", label);
+			node.peek().put("label", label);
 			logger.trace("Create a trans {}", label);
 			break;
 		default:
 		}
-		env.put(label, node);		
+		env.put(label, node.pop());		
 	}
 	
 	public void buildArc(String type, String src, String dest) {
@@ -153,28 +153,28 @@ public class NetBuilder {
 		case "arc":
 		case "iarc":
 		case "oarc":
-			node.setType("arc");
-			node.put("src", src);
-			node.put("dest", dest);
+			node.peek().setType("arc");
+			node.peek().put("src", src);
+			node.peek().put("dest", dest);
 			logger.trace("Create arc {} to {}", src, dest);
 			break;
 		case "harc":
-			node.setType("harc");
-			node.put("src", src);
-			node.put("dest", dest);
+			node.peek().setType("harc");
+			node.peek().put("src", src);
+			node.peek().put("dest", dest);
 			logger.trace("Create harc {} to {}", src, dest);
 			break;
 		default:
 		}
-		env.put(src + ":" + dest, node);		
+		env.put(src + ":" + dest, node.pop());
 	}
 
 	public void buildReward(String label) {
-		node.setType("reward");
-		node.put("label", label);
+		node.peek().setType("reward");
+		node.peek().put("label", label);
 		AST f = stack.pop();
-		node.put("formula", f);		
-		env.put(label, node);
+		node.peek().put("formula", f);		
+		env.put(label, node.pop());
 		logger.trace("Create reward {}: {}", label, f);
 	}
 
@@ -193,7 +193,7 @@ public class NetBuilder {
 			list.add(a);
 			a = stack.pop();
 		}
-		node.put("update", list);		
+		node.peek().put("update", list);		
 		logger.trace("Put an update block");
 	}
 
@@ -203,7 +203,7 @@ public class NetBuilder {
 		logger.trace("Put an assign expression {} = {}", label, right);
 	}
 
-	public void buildAssignNTokenExpression(String label) {
+	public void buildAssignNTokenExpression() {
 		AST right = stack.pop();
 		ASTNToken ntoken = (ASTNToken) stack.pop();
 		stack.push(new ASTAssignNToken(ntoken.getLabel(), right));
@@ -211,14 +211,13 @@ public class NetBuilder {
 	}
 
 	public void buildValueExpression(String label) {
-		Object tmp;
 		try {
-			tmp = env.get(label);
+			Object tmp = env.get(label);
 			stack.push(ASTValue.getAST(tmp));
 		} catch (ObjectNotFoundInASTEnv e) {
-			stack.push(ASTValue.getAST(null));
-			logger.error("The value {} is not found in environment", label);
-		}		
+			stack.push(new ASTVariable(label));
+			logger.trace("The value {} is not found in environment", label);
+		}
 	}
 
 	public void buildUnaryExpression(String op) {
@@ -289,10 +288,10 @@ public class NetBuilder {
 		AST retval;
 		switch (func) {
 		case ConstDist.dname:
-			retval = this.buildConstDist(node);
+			retval = this.buildConstDist(node.pop());
 			break;
 		case UnifDist.dname:
-			retval = this.buildUnifDist(node);
+			retval = this.buildUnifDist(node.pop());
 			break;
 //		case TNormDist.dname:
 //			this.defineTNormDist(args);
@@ -304,25 +303,25 @@ public class NetBuilder {
 //			this.defineWeibullDist(args);
 //			break;
 		case ExpDist.dname:
-			retval = this.buildExpDist(node);
+			retval = this.buildExpDist(node.pop());
 			break;
 		case "min":
-			retval = this.buildMinFunc(node);
+			retval = this.buildMinFunc(node.pop());
 			break;
 		case "max":
-			retval = this.buildMaxFunc(node);
+			retval = this.buildMaxFunc(node.pop());
 			break;
 		case "pow":
-			retval = this.buildPowFunc(node);
+			retval = this.buildPowFunc(node.pop());
 			break;
 		case "sqrt":
-			retval = this.buildSqrtFunc(node);
+			retval = this.buildSqrtFunc(node.pop());
 			break;
 		case "exp":
-			retval = this.buildExpFunc(node);
+			retval = this.buildExpFunc(node.pop());
 			break;
 		case "log":
-			retval = this.buildLogFunc(node);
+			retval = this.buildLogFunc(node.pop());
 			break;
 //		case "print":
 //			stack.push(new ASTMathFunc(args, "print"));

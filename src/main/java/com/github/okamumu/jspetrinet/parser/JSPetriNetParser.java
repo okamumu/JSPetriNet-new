@@ -256,7 +256,7 @@ public class JSPetriNetParser implements JSPNLListener {
 			astbuilder.buildAssignExpression(ctx.id.getText());
 			break;
 		case 2:
-			astbuilder.buildAssignNTokenExpression(ctx.id.getText());
+			astbuilder.buildAssignNTokenExpression();
 			break;
 		default:
 		}
