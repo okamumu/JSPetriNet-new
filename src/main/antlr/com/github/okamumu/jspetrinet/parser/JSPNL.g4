@@ -67,27 +67,27 @@ simple
 // assign
 
 assign_expression returns [int type]
-    : id=ID '=' expression { $type = 1; }
-    | ntoken_expression '=' expression { $type = 2; }
+    : id=ID '=' expression {$type = 1; }
+    | ntoken_expression '=' expression {$type = 2; }
     ;
 
 // expression
 
 expression returns [int type]
-    : op=('!'|'+'|'-') expression { $type = 1; }
-    | expression op=('*'|'/'|'div'|'mod') expression { $type = 2; }
-    | expression op=('+'|'-') expression { $type = 3; }
-    | expression op=('<'|'<='|'>'|'>=') expression { $type = 4; }
-    | expression op=('=='|'!=') expression { $type = 5; }
-    | expression op='&&' expression { $type = 6; }
-    | expression op='||' expression { $type = 7; }
-    | op='ifelse' '(' expression ',' expression ',' expression ')' { $type = 8; }
-    | function_expression { $type = 9; }
-    | ntoken_expression { $type = 10; }
-    | enable_expression { $type = 14; }
-    | literal_expression { $type = 11; }
-    | id=ID { $type = 12; }
-    |	'(' expression ')' { $type = 13; }
+    : op=('!'|'+'|'-') expression {$type = 1; }
+    | expression op=('*'|'/'|'div'|'mod') expression {$type = 2; }
+    | expression op=('+'|'-') expression {$type = 3; }
+    | expression op=('<'|'<='|'>'|'>=') expression {$type = 4; }
+    | expression op=('=='|'!=') expression {$type = 5; }
+    | expression op='&&' expression {$type = 6; }
+    | expression op='||' expression {$type = 7; }
+    | op='ifelse' '(' expression ',' expression ',' expression ')' {$type = 8; }
+    | function_expression {$type = 9; }
+    | ntoken_expression {$type = 10; }
+    | enable_expression {$type = 14; }
+    | literal_expression {$type = 11; }
+    | id=ID {$type = 12; }
+    |	'(' expression ')' {$type = 13; }
     ;
 
 // function_expression
@@ -125,10 +125,10 @@ enable_expression
 // literal
 
 literal_expression returns [int type]
-    : val=INT      { $type = 1; }
-    | val=FLOAT    { $type = 2; }
-    | val=LOGICAL  { $type = 3; }
-    | val=STRING   { $type = 4; }
+    : val=INT      {$type = 1; }
+    | val=FLOAT    {$type = 2; }
+    | val=LOGICAL  {$type = 3; }
+    | val=STRING   {$type = 4; }
     ;
 
 // TOKENS
