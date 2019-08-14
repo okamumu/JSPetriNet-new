@@ -11,7 +11,6 @@ import com.github.okamumu.jspetrinet.ast.ASTEnv;
 import com.github.okamumu.jspetrinet.ast.operators.ASTArithmetic;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.exception.ASTException;
-import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
 import com.github.okamumu.jspetrinet.graph.Arc;
 import com.github.okamumu.jspetrinet.marking.GenVec;
 import com.github.okamumu.jspetrinet.marking.Mark;
@@ -87,7 +86,11 @@ public class MarkingMatrix {
 		int next_index = 0;
 		for (GenVec g : mp.getGenVec()) {
 			String key = Arrays.toString(g.copy());
-			Integer i = index.getOrDefault(key, next_index++);
+			if (!index.containsKey(key)) {
+				index.put(key, next_index);
+				next_index++;
+			}
+			Integer i = index.get(key);
 			switch(g.getType()) {
 			case IMM:
 				genvecLabel.put(g, "I" + i);

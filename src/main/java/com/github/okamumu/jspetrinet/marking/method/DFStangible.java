@@ -26,32 +26,50 @@ import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 import com.github.okamumu.jspetrinet.petri.nodes.ImmTrans;
 import com.github.okamumu.jspetrinet.petri.nodes.Trans;
 
-/**
- * A class for the method to generate a marking graph
- *
- */
-public class DFS implements CreateMarking {
+public class DFStangible implements CreateMarking {
+	
+	class Arc {
+		Mark src;
+		Mark dest;
+		Trans tr;
+		
+		Arc(Mark src, Mark dest, Trans tr) {
+			this.src = src;
+			this.dest = dest;
+			this.tr = tr;
+		}
+	}
+
+	private static final Mark endMark = new Mark(null);
 	
 	private MarkingGraph markGraph;
 
 	private final Map<Mark,Mark> createdMarks;
-	private final Set<Mark> visited;
-	private final LinkedList<Mark> novisited;	
 	private final Map<GenVec,GenVec> genvecSet;
+	private final Set<Mark> visited;
+	private final LinkedList<Mark> novisited;
+	private final LinkedList<Mark> novisitedIMM;
+	private final Map<Mark,ExitMark> exitMarkSet;
+	private final LinkedList<Mark> markPath;
+	private final Map<Mark,GenVec> markToGenVec;
+	private final List<Arc> arcList;
 
 	private final Logger logger;
 	private final PetriAnalysis analysis;
-
-	/**
-	 * Constructor
-	 */
-	public DFS() {
+	
+	public DFStangible() {
 		createdMarks = new HashMap<Mark,Mark>();
 		visited = new HashSet<Mark>();
 		novisited = new LinkedList<Mark>();
-		logger = LoggerFactory.getLogger(DFS.class);
-		analysis = PetriAnalysis.getInstance();
+		novisitedIMM = new LinkedList<Mark>();
 		genvecSet = new HashMap<GenVec,GenVec>();
+		markPath = new LinkedList<Mark>();
+		exitMarkSet = new HashMap<Mark,ExitMark>();
+		markToGenVec = new HashMap<Mark,GenVec>();
+		arcList = new ArrayList<Arc>();
+
+		logger = LoggerFactory.getLogger(DFStangible.class);
+		analysis = PetriAnalysis.getInstance();
 	}
 	
 	@Override
@@ -60,6 +78,7 @@ public class DFS implements CreateMarking {
 		createdMarks.put(init, init);
 		novisited.push(init);
 		createMarking(net, env);
+		postProcessing();
 	}
 	
 	/**
@@ -125,7 +144,7 @@ public class DFS implements CreateMarking {
 		} else {
 			genvecSet.put(genv, genv);
 		}
-		markGraph.setGenVec(m, genv);
+		markToGenVec.put(m, genv);
 		logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
 	}
 
@@ -141,7 +160,7 @@ public class DFS implements CreateMarking {
 		} else {
 			genvecSet.put(genv, genv);
 		}
-		markGraph.setGenVec(m, genv);
+		markToGenVec.put(m, genv);
 		logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
 	}
 
@@ -157,7 +176,7 @@ public class DFS implements CreateMarking {
 		} else {
 			genvecSet.put(genv, genv);
 		}
-		markGraph.setGenVec(m, genv);
+		markToGenVec.put(m, genv);
 		logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
 	}
 
@@ -189,12 +208,13 @@ public class DFS implements CreateMarking {
 	 * @throws MarkingError An error when the generated marking takes negative or exceeds the maximum
 	 */
 	private void visitImmMark(Mark m, List<Trans> enabledIMMList, ASTEnv env) throws ASTException, MarkingError {
+		markPath.push(m);
+		novisitedIMM.push(endMark);
 		for (Trans tr : enabledIMMList) {
 			Mark dest = createNextMarking(m, env, tr);
-			novisited.push(dest);
+			novisitedIMM.push(dest);
 			connectTo(m, dest, tr);
 		}
-		visited.add(m);
 	}
 	
 	/**
@@ -231,6 +251,7 @@ public class DFS implements CreateMarking {
 			}
 		}
 		visited.add(m);
+		exitMarkSet.put(m, ExitMark.finalize(m));
 		return noenabled;
 	}
 
@@ -239,14 +260,59 @@ public class DFS implements CreateMarking {
 	 * @param src A source marking
 	 * @param dest A destination marking
 	 * @param tr A transition
+	 * @throws MarkingError 
 	 */
 	private void connectTo(Mark src, Mark dest, Trans tr) {
-		src.new Arc(src, dest, tr);
+//		src.new Arc(src, dest, tr);
+		arcList.add(new Arc(src, dest, tr));
+	}
+	
+	private void margeExitSet(Mark m, Mark other) throws MarkingError {
+		ExitMark em = exitMarkSet.getOrDefault(m, ExitMark.init(m));
+		ExitMark eo = exitMarkSet.getOrDefault(other, ExitMark.init(other));
+		exitMarkSet.put(m, ExitMark.union(markToGenVec, em, eo));
+	}
+
+	private void vanishing(Net net, ASTEnv env) throws JSPNException {
+		while (!novisitedIMM.isEmpty()) {
+			Mark m = novisitedIMM.pop();
+
+			if (m == endMark) {
+				markPath.pop();
+				visited.add(m);
+				continue;
+			}
+
+			if (visited.contains(m)) {
+				Mark r = markPath.peek();
+				margeExitSet(r, m);
+				continue;
+			}
+
+			// new visit
+			int[] vec = createGenVec(m, net, env);
+			logger.trace("New visit {} (GenVec {}) in vanishing", m.toString(), Arrays.toString(vec));
+
+			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
+			if (enabledIMMList.size() > 0) {
+				visitImmMark(m, enabledIMMList, env);
+				setGenVecToImm(m, vec);
+			} else {
+				if (visitGenMark(m, net, env) == false) {
+					setGenVecToGen(m, vec);
+				} else {
+					setGenVecToAbs(m, vec);
+				}
+				Mark r = markPath.peek();
+				margeExitSet(r, m);
+			}
+		}
 	}
 
 	private void createMarking(Net net, ASTEnv env) throws JSPNException {
 		while (!novisited.isEmpty()) {
 			Mark m = novisited.pop();
+
 			if (visited.contains(m)) {
 				continue;
 			}
@@ -259,12 +325,32 @@ public class DFS implements CreateMarking {
 			if (enabledIMMList.size() > 0) {
 				visitImmMark(m, enabledIMMList, env);
 				setGenVecToImm(m, vec);
+				vanishing(net, env);
 			} else {
 				if (visitGenMark(m, net, env) == false) {
 					setGenVecToGen(m, vec);
 				} else {
 					setGenVecToAbs(m, vec);
 				}
+			}
+		}
+	}
+
+	private void postProcessing() {
+		// post processing 1
+		for (Map.Entry<Mark,GenVec> entry : markToGenVec.entrySet()) {
+			if (!exitMarkSet.get(entry.getKey()).canVanishing()) {
+				this.markGraph.setGenVec(entry.getKey(), entry.getValue());
+			}
+		}
+		for (Arc a : arcList) {
+			Mark src = a.src;
+			Mark dest = a.dest;
+			Trans tr = a.tr;
+			if (exitMarkSet.get(dest).canVanishing()) {
+				src.new Arc(src, exitMarkSet.get(dest).get(), tr);
+			} else {
+				src.new Arc(src, dest, tr);				
 			}
 		}
 	}

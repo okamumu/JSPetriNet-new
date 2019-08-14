@@ -105,12 +105,14 @@ public final class PetriAnalysis {
 		env.put(currentMarkingString, m);
 		int[] next = m.copy();
 		for (Arc arc : tr.getInArc()) {
-			Place place = (Place) arc.getSrc();
-			ArcBase arcBase = (ArcBase) arc;
-			next[place.getIndex()] = next[place.getIndex()] - arcBase.getMulti(env);
-			if (next[place.getIndex()] < 0) {
-				logger.error("The number of tokens becomes negative. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
-				throw new MarkingError("Error: #" + place.getLabel() + " becomes negative by firing " + tr.getLabel());
+			if (!(arc instanceof InhibitArc)) {
+				Place place = (Place) arc.getSrc();
+				ArcBase arcBase = (ArcBase) arc;
+				next[place.getIndex()] = next[place.getIndex()] - arcBase.getMulti(env);
+				if (next[place.getIndex()] < 0) {
+					logger.error("The number of tokens becomes negative. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
+					throw new MarkingError("Error: #" + place.getLabel() + " becomes negative by firing " + tr.getLabel());
+				}
 			}
 		}
 		for (Arc arc : tr.getOutArc()) {

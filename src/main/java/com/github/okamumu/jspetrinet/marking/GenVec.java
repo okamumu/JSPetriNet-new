@@ -87,6 +87,16 @@ public class GenVec extends StateVector {
 		}
 		return result + ")";
 	}
+	
+	public boolean isSameClass(GenVec other) {
+		if (this == other) {
+			return true;
+		}
+		if (super.equals(other))
+			return true;
+		else
+			return false;
+	}
 
 	@Override
 	public int hashCode() {
