@@ -47,7 +47,7 @@ public class PetriNetTest {
 
     @Test
 	public void testPrintNet() {
-    	PNWriter.write(new PrintWriter(System.out), net, null);
+    	PNWriter.write(net, null);
 	}
 
 }

@@ -39,7 +39,8 @@ public final class PetriAnalysis {
 	public final Trans.Status isEnable(Mark m, ASTEnv env, Trans tr) throws ASTException {
 		env.put(currentMarkingString, m);
 		if (!tr.guardEval(env)) {
-			logger.trace("Trans {} is diabled at {}", tr.getLabel(), m.toString());
+			if (logger.isTraceEnabled())
+				logger.trace("Trans {} is diabled at {}", tr.getLabel(), m.toString());
 			return Trans.Status.DISABLE;
 		}
 		for (Arc arc : tr.getInArc()) {
@@ -47,18 +48,21 @@ public final class PetriAnalysis {
 			if (arc instanceof InhibitArc) {
 				InhibitArc narc = (InhibitArc) arc;
 				if (m.get(place.getIndex()) >= narc.getMulti(env)) {
-					logger.trace("Trans {} is disabled at {}", tr.getLabel(), m.toString());
+					if (logger.isTraceEnabled())
+						logger.trace("Trans {} is disabled at {}", tr.getLabel(), m.toString());
 					return Trans.Status.DISABLE;
 				}				
 			} else {
 				ArcBase narc = (ArcBase) arc;
 				if (m.get(place.getIndex()) < narc.getMulti(env)) {
-					logger.trace("Trans {} is diabled at {}", tr.getLabel(), m.toString());
+					if (logger.isTraceEnabled())
+						logger.trace("Trans {} is diabled at {}", tr.getLabel(), m.toString());
 					return Trans.Status.DISABLE;
 				}
 			}
 		}
-		logger.trace("Trans {} is enabled at {}", tr.getLabel(), m.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Trans {} is enabled at {}", tr.getLabel(), m.toString());
 		return Trans.Status.ENABLE;
 	}
 
@@ -82,21 +86,25 @@ public final class PetriAnalysis {
 			} else {
 				ArcBase narc = (ArcBase) arc;
 				if (m.get(place.getIndex()) < narc.getMulti(env)) {
-					logger.trace("Trans {} is disabled at {}", tr.getLabel(), m.toString());
+					if (logger.isTraceEnabled())
+						logger.trace("Trans {} is disabled at {}", tr.getLabel(), m.toString());
 					return Trans.Status.DISABLE;
 				}
 			}
 		}
 		if (maybePreemption == true) {
 			if (((GenTrans) tr).getPolicy() == GenTrans.Policy.PRD) {
-				logger.trace("Trans {} is disbled at {}", tr.getLabel(), m.toString());
+				if (logger.isTraceEnabled())
+					logger.trace("Trans {} is disbled at {}", tr.getLabel(), m.toString());
 				return Trans.Status.DISABLE;
 			} else {
-				logger.trace("Trans {} is preempted at {}", tr.getLabel(), m.toString());
+				if (logger.isTraceEnabled())
+					logger.trace("Trans {} is preempted at {}", tr.getLabel(), m.toString());
 				return Trans.Status.PREEMPTION;
 			}
 		} else {
-			logger.trace("Trans {} is enabled at {}", tr.getLabel(), m.toString());
+			if (logger.isTraceEnabled())
+				logger.trace("Trans {} is enabled at {}", tr.getLabel(), m.toString());
 			return Trans.Status.ENABLE;
 		}
 	}
@@ -110,7 +118,8 @@ public final class PetriAnalysis {
 				ArcBase arcBase = (ArcBase) arc;
 				next[place.getIndex()] = next[place.getIndex()] - arcBase.getMulti(env);
 				if (next[place.getIndex()] < 0) {
-					logger.error("The number of tokens becomes negative. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
+					if (logger.isErrorEnabled())
+						logger.error("The number of tokens becomes negative. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
 					throw new MarkingError("Error: #" + place.getLabel() + " becomes negative by firing " + tr.getLabel());
 				}
 			}
@@ -120,12 +129,14 @@ public final class PetriAnalysis {
 			ArcBase arcBase = (ArcBase) arc;
 			next[place.getIndex()] = next[place.getIndex()] + arcBase.getMulti(env);
 			if (next[place.getIndex()] > place.getMax()) {
-				logger.error("The number of tokens exceeds maximum. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
+				if (logger.isErrorEnabled())
+					logger.error("The number of tokens exceeds maximum. Place {}(index {}), Trans {}, Marking {}", place.getLabel(), place.getIndex(), tr.getLabel(), m.toString());
 				throw new MarkingError("Error: #" + place.getLabel() + " exceeds MAX by firing " + tr.getLabel());
 			}
 		}
 		Mark tmp = new Mark(next);
-		logger.trace("Making a mark from {} to {} by firing Trans {}", m.toString(), tmp.toString(), tr.getLabel());
+		if (logger.isTraceEnabled())
+			logger.trace("Making a mark from {} to {} by firing Trans {}", m.toString(), tmp.toString(), tr.getLabel());
 		env.put(currentMarkingString, tmp);
 		if (tr.getUpdate() == null) {
 			return tmp;
@@ -156,7 +167,8 @@ public final class PetriAnalysis {
 		int[] vec = m.copy();
 		vec[p.getIndex()] = res;
 		Mark tmp = new Mark(vec);
-		logger.trace("Updating a mark to {}", tmp.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Updating a mark to {}", tmp.toString());
 		env.put(currentMarkingString, tmp);
 		return res;
 	}

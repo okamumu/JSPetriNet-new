@@ -59,7 +59,7 @@ public class PetriNetCompileTest {
 	public void testPrintNet() {
     	try {
 			Net net = FactoryPN.getInstance().compilePN(env);
-	    	PNWriter.write(new PrintWriter(System.out), net, null);
+	    	PNWriter.write(net, null);
 		} catch (ObjectNotFoundInASTEnv e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

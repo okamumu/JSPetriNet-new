@@ -26,12 +26,24 @@ public class MarkWriter {
 	private static String absFormatG = "\"%s\" [label=\"%s\n(%d)\"];" + ln;
 	private static String arcFormatG = "\"%s\" -> \"%s\" [];" + ln;
 
-	public static void writeMark(PrintWriter bw, Net net, MarkingGraph mgraph) {
+	/**
+	 * Write a graph of marking (System.out)
+	 * @param net An instance of Net
+	 * @param mgraph An instance of MarkingGraph
+	 */
+	public static void writeMark(Net net, MarkingGraph mgraph) {
+		PrintWriter bw = new PrintWriter(System.out, true);
 		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
 		pviz.dotMark();
 	}
 	
-	public static void writeMarkGroup(PrintWriter bw, Net net, MarkingGraph mgraph) {
+	/**
+	 * Write a graph of Group of marking (System.out)
+	 * @param net An instance of Net
+	 * @param mgraph An instance of MarkingGraph
+	 */
+	public static void writeMarkGroup(Net net, MarkingGraph mgraph) {
+		PrintWriter bw = new PrintWriter(System.out, true);
 		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
 		pviz.dotMarkGroup();
 	}

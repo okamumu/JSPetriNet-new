@@ -102,7 +102,7 @@ public class PetriNetMarkingTest3 {
     	try {
     		Net net = FactoryPN.getInstance().compilePN(env);
     		PrintWriter bw = new PrintWriter(System.out);
-        	PNWriter.write(bw, net, env);
+        	PNWriter.write(net, env);
         	bw.flush();
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
@@ -117,7 +117,7 @@ public class PetriNetMarkingTest3 {
     		PrintWriter bw = new PrintWriter(System.out);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(bw, net, mg);
+			MarkWriter.writeMark(net, mg);
         	bw.flush();
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
@@ -132,11 +132,11 @@ public class PetriNetMarkingTest3 {
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
 
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			for (Map.Entry<GenVec,List<Mark>> entry : mg.getMarkSet().entrySet()) {
 				System.out.println(entry.getKey().getString(net));
 				for (Mark m : entry.getValue()) {
-					System.out.print(mat.getMarkIndex().get(m) + " : ");
+//					System.out.print(mat.getMarkIndex().get(m) + " : ");
 					System.out.println(m.getString(net));
 				}				
 			}
@@ -174,10 +174,12 @@ public class PetriNetMarkingTest3 {
     		Net net = FactoryPN.getInstance().compilePN(env);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
-			MatlabMatrixWriter matlab = new MatlabMatrixWriter(env, mat);
-			matlab.writeMatlabMatrix("test2.mat");
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

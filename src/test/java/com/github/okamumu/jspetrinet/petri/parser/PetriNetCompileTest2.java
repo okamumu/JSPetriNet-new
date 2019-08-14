@@ -2,6 +2,7 @@ package com.github.okamumu.jspetrinet.petri.parser;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -44,7 +45,7 @@ public class PetriNetCompileTest2 {
     	Env env = new Env();
     	Net net = NetBuilder.build(str.toString(), env);
 		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(bw, net, env);
+    	PNWriter.write(net, env);
     	bw.flush();
 	}
 
@@ -62,14 +63,16 @@ public class PetriNetCompileTest2 {
     	Env env = new Env();
     	Net net = NetBuilder.build(str.toString(), env);
 		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(bw, net, env);
+    	PNWriter.write(net, env);
     	bw.flush();
 		try {
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
-			MatlabMatrixWriter matlab = new MatlabMatrixWriter(env, mat);
-			matlab.writeMatlabMatrix("test2.mat");
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -91,13 +94,15 @@ public class PetriNetCompileTest2 {
 	    	Env env = new Env();
 	    	Net net = NetBuilder.build(str.toString(), env);
 			PrintWriter bw = new PrintWriter(System.out);
-	    	PNWriter.write(bw, net, env);
+	    	PNWriter.write(net, env);
 	    	bw.flush();
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
-			MatlabMatrixWriter matlab = new MatlabMatrixWriter(env, mat);
-			matlab.writeMatlabMatrix("test2.mat");
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -120,14 +125,16 @@ public class PetriNetCompileTest2 {
 	    	Env env = new Env();
 	    	Net net = NetBuilder.build(str.toString(), env);
 			PrintWriter bw = new PrintWriter(System.out);
-	    	PNWriter.write(bw, net, env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
-			MarkWriter.writeMark(bw, net, mg);
+			MarkWriter.writeMark(net, mg);
 	    	bw.flush();
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
-			MatlabMatrixWriter matlab = new MatlabMatrixWriter(env, mat);
-			matlab.writeMatlabMatrix("test2.mat");
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

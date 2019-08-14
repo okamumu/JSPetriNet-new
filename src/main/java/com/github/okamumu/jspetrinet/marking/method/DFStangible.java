@@ -145,7 +145,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -161,7 +162,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -177,7 +179,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -277,12 +280,20 @@ public class DFStangible implements CreateMarking {
 		while (!novisitedIMM.isEmpty()) {
 			Mark m = novisitedIMM.pop();
 
+			/**
+			 * If m is endMark,
+			 * it finishes exploring children of the top of stack markPath.
+			 */
 			if (m == endMark) {
-				markPath.pop();
-				visited.add(m);
+				Mark e = markPath.pop();
+				visited.add(e);
 				continue;
 			}
 
+			/**
+			 * If m is visited, the exploring of m is also finished.
+			 * Therefore, the merge is executed.
+			 */
 			if (visited.contains(m)) {
 				Mark r = markPath.peek();
 				margeExitSet(r, m);
@@ -291,7 +302,8 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.trace("New visit {} (GenVec {}) in vanishing", m.toString(), Arrays.toString(vec));
+			if (logger.isTraceEnabled())
+				logger.trace("New visit {} (GenVec {}) in vanishing", m.toString(), Arrays.toString(vec));
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -319,7 +331,8 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
+			if (logger.isTraceEnabled())
+				logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -347,10 +360,12 @@ public class DFStangible implements CreateMarking {
 			Mark src = a.src;
 			Mark dest = a.dest;
 			Trans tr = a.tr;
-			if (exitMarkSet.get(dest).canVanishing()) {
-				src.new Arc(src, exitMarkSet.get(dest).get(), tr);
-			} else {
-				src.new Arc(src, dest, tr);				
+			if (exitMarkSet.get(src).canVanishing() == false) {
+				if (exitMarkSet.get(dest).canVanishing() == true) {
+					src.new Arc(src, exitMarkSet.get(dest).get(), tr);
+				} else {
+					src.new Arc(src, dest, tr);				
+				}
 			}
 		}
 	}

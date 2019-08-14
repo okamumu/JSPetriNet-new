@@ -103,18 +103,21 @@ public class NetBuilder {
 		AST right = stack.pop();
 		String label = "arg" + node.size();
 		node.peek().put(label, right);
-		logger.trace("Set option {}: {}", label, right);
+		if (logger.isTraceEnabled())
+			logger.trace("Set option {}: {}", label, right);
 	}
 	
 	public void setNodeOption(String label) {
 		AST right = stack.pop();
 		node.peek().put(label, right);
-		logger.trace("Set option {}: {}", label, right);
+		if (logger.isTraceEnabled())
+			logger.trace("Set option {}: {}", label, right);
 	}
 	
 	public void createNewNode() {
 		node.push(factory.new Node());
-		logger.trace("Create a new option node");
+		if (logger.isTraceEnabled())
+			logger.trace("Create a new option node");
 	}
 
 	public void buildNode(String type, String label) {
@@ -122,26 +125,31 @@ public class NetBuilder {
 		case "place":
 			node.peek().setType("place");
 			node.peek().put("label", label);
-			logger.trace("Create a place {}: label", label);
+			if (logger.isTraceEnabled())
+				logger.trace("Create a place {}: label", label);
 			break;
 		case "imm":
 			node.peek().setType("imm");
 			node.peek().put("label", label);
-			logger.trace("Create an imm {}: label", label);
+			if (logger.isTraceEnabled())
+				logger.trace("Create an imm {}: label", label);
 			break;
 		case "exp":
 			node.peek().setType("exp");
 			node.peek().put("label", label);
-			logger.trace("Create an exp {}: label", label);
+			if (logger.isTraceEnabled())
+				logger.trace("Create an exp {}: label", label);
 			break;
 		case "gen":
 			node.peek().setType("gen");
 			node.peek().put("label", label);
-			logger.trace("Create a gen {}: label", label);
+			if (logger.isTraceEnabled())
+				logger.trace("Create a gen {}: label", label);
 			break;
 		case "trans":
 			node.peek().put("label", label);
-			logger.trace("Create a trans {}", label);
+			if (logger.isTraceEnabled())
+				logger.trace("Create a trans {}", label);
 			break;
 		default:
 		}
@@ -156,13 +164,15 @@ public class NetBuilder {
 			node.peek().setType("arc");
 			node.peek().put("src", src);
 			node.peek().put("dest", dest);
-			logger.trace("Create arc {} to {}", src, dest);
+			if (logger.isTraceEnabled())
+				logger.trace("Create arc {} to {}", src, dest);
 			break;
 		case "harc":
 			node.peek().setType("harc");
 			node.peek().put("src", src);
 			node.peek().put("dest", dest);
-			logger.trace("Create harc {} to {}", src, dest);
+			if (logger.isTraceEnabled())
+				logger.trace("Create harc {} to {}", src, dest);
 			break;
 		default:
 		}
@@ -175,7 +185,8 @@ public class NetBuilder {
 		AST f = stack.pop();
 		node.peek().put("formula", f);		
 		env.put(label, node.pop());
-		logger.trace("Create reward {}: {}", label, f);
+		if (logger.isTraceEnabled())
+			logger.trace("Create reward {}: {}", label, f);
 	}
 
 	
@@ -183,7 +194,8 @@ public class NetBuilder {
 
 	public void setUpdateBlockEnd() {
 		stack.push(new BlockEnd());
-		logger.trace("Set an update block end");
+		if (logger.isTraceEnabled())
+			logger.trace("Set an update block end");
 	}
 	
 	public void buildUpdateBlock() {
@@ -193,21 +205,24 @@ public class NetBuilder {
 			list.add(a);
 			a = stack.pop();
 		}
-		node.peek().put("update", list);		
-		logger.trace("Put an update block");
+		node.peek().put("update", list);
+		if (logger.isTraceEnabled())
+			logger.trace("Put an update block");
 	}
 
 	public void buildAssignExpression(String label) {
 		AST right = stack.pop();
 		env.put(label, right);
-		logger.trace("Put an assign expression {} = {}", label, right);
+		if (logger.isTraceEnabled())
+			logger.trace("Put an assign expression {} = {}", label, right);
 	}
 
 	public void buildAssignNTokenExpression() {
 		AST right = stack.pop();
 		ASTNToken ntoken = (ASTNToken) stack.pop();
 		stack.push(new ASTAssignNToken(ntoken.getLabel(), right));
-		logger.trace("Build an assing ntoken #{} = {}", ntoken.getLabel(), right);
+		if (logger.isTraceEnabled())
+			logger.trace("Build an assing ntoken #{} = {}", ntoken.getLabel(), right);
 	}
 
 	public void buildValueExpression(String label) {
@@ -216,7 +231,8 @@ public class NetBuilder {
 			stack.push(ASTValue.getAST(tmp));
 		} catch (ObjectNotFoundInASTEnv e) {
 			stack.push(new ASTVariable(label));
-			logger.trace("The value {} is not found in environment", label);
+			if (logger.isTraceEnabled())
+				logger.trace("The value {} is not found in environment", label);
 		}
 	}
 
@@ -328,7 +344,8 @@ public class NetBuilder {
 //			break;
 		default:
 			retval = ASTValue.getAST(null);
-			logger.error("Function: {} is not defined", func);
+			if (logger.isErrorEnabled())
+				logger.error("Function: {} is not defined", func);
 		}
 		stack.push(retval);
 	}
@@ -344,7 +361,8 @@ public class NetBuilder {
 			default:
 			}
 		}
-		logger.trace("Build a const dist");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a const dist");
 		return new ConstDist(value);
 	}
 
@@ -364,7 +382,8 @@ public class NetBuilder {
 			default:
 			}
 		}
-		logger.trace("Build a unif dist");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a unif dist");
 		return new UnifDist(min, max);
 	}
 
@@ -379,7 +398,8 @@ public class NetBuilder {
 			default:
 			}
 		}
-		logger.trace("Build an exp dist");
+		if (logger.isTraceEnabled())
+			logger.trace("Build an exp dist");
 		return new ExpDist(rate);
 	}
 
@@ -388,7 +408,8 @@ public class NetBuilder {
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
 		}
-		logger.trace("Build a min func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a min func");
 		return new ASTMathFunc(args, "min");
 	}
 
@@ -397,7 +418,8 @@ public class NetBuilder {
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
 		}
-		logger.trace("Build a max func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a max func");
 		return new ASTMathFunc(args, "max");
 	}
 
@@ -420,7 +442,8 @@ public class NetBuilder {
 		ASTList args = new ASTList();
 		args.add(x);
 		args.add(n);
-		logger.trace("Build a pow func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a pow func");
 		return new ASTMathFunc(args, "pow");
 	}
 
@@ -437,7 +460,8 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		logger.trace("Build a sqrt func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a sqrt func");
 		return new ASTMathFunc(args, "sqrt");
 	}
 
@@ -454,7 +478,8 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		logger.trace("Build an exp func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build an exp func");
 		return new ASTMathFunc(args, "exp");
 	}
 
@@ -471,7 +496,8 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		logger.trace("Build a log func");
+		if (logger.isTraceEnabled())
+			logger.trace("Build a log func");
 		return new ASTMathFunc(args, "log");
 	}
 }

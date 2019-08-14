@@ -1,6 +1,11 @@
 package com.github.okamumu.jspetrinet.writer;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -42,16 +47,30 @@ public class PNWriter {
 	private static String harcFMT = "\"%s\" -> \"%s\" [label = \"%s\", arrowhead=odot];" + ln;
 
 	/**
-	 * A method to write the Petri net graph to PrintWriter
-	 * @param bw An instance of PrintWriter
+	 * A method to write the Petri net graph to PrintWriter (System.out)
 	 * @param net An instance of Petri net
 	 * @param env An instance of environment
 	 */
-	public static void write(PrintWriter bw, Net net, ASTEnv env) {
+	public static void write(Net net, ASTEnv env) {
+		PrintWriter bw = new PrintWriter(System.out, true);
 		PNWriter pviz = new PNWriter(net, env, bw);
 		pviz.doDraw();
 	}
 	
+	/**
+	 * A method to write the Petri net graph to PrintWriter (file)
+	 * @param file A file name
+	 * @param net An instance of Petri net
+	 * @param env An instance of environment
+	 * @throws IOException 
+	 */
+	public static void write(String file, Net net, ASTEnv env) throws IOException {
+		BufferedWriter buf = Files.newBufferedWriter(Paths.get(file), StandardCharsets.UTF_8);
+		PrintWriter bw = new PrintWriter(buf, false);
+		PNWriter pviz = new PNWriter(net, env, bw);
+		pviz.doDraw();
+	}
+
 	private PNWriter(Net net, ASTEnv env, PrintWriter bw) {
 		visited = new HashSet<Object>();
 		novisited = new LinkedList<Object>();

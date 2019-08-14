@@ -67,11 +67,11 @@ public class PetriNetMarkingTest {
     	try {
     		Net net = FactoryPN.getInstance().compilePN(env);
     		PrintWriter bw = new PrintWriter(System.out);
-        	PNWriter.write(bw, net, null);
+        	PNWriter.write(net, null);
         	int[] vec = {1,0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(bw, net, mg);
-			MarkWriter.writeMarkGroup(bw, net, mg);
+			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMarkGroup(net, mg);
 			bw.flush();
 			System.out.println(mg.immSize());
 			System.out.println(mg.genSize());
@@ -87,17 +87,17 @@ public class PetriNetMarkingTest {
     	try {
     		Net net = FactoryPN.getInstance().compilePN(env);
     		PrintWriter bw = new PrintWriter(System.out);
-        	PNWriter.write(bw, net, null);
+        	PNWriter.write(net, null);
         	int[] vec = {1,0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(bw, net, mg);
-			MarkWriter.writeMarkGroup(bw, net, mg);
+			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMarkGroup(net, mg);
 			bw.flush();
 			System.out.println(mg.immSize());
 			System.out.println(mg.genSize());
 			System.out.println(mg.absSize());
 			
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

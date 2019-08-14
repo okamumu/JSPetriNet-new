@@ -8,65 +8,60 @@ import com.github.okamumu.jspetrinet.marking.Mark;
 
 class ExitMark {
 	
-	enum NumOfExitMarks {
-		NotYet,
-		One,
-		MoreThanOne
+	enum StatusOfExitMarks {
+		Init,
+		Vanishable,
+		NoVanishable,		
 	}
 	
 	public static ExitMark init(Mark m) {
-		return new ExitMark(m, NumOfExitMarks.NotYet, false);
+		return new ExitMark(m, StatusOfExitMarks.Init);
 	}
 	
 	public static ExitMark finalize(Mark m) {
-		return new ExitMark(m, NumOfExitMarks.One, false);
+		return new ExitMark(m, StatusOfExitMarks.NoVanishable);
 	}
 
-	public static ExitMark union(Map<Mark,GenVec> mg, ExitMark m, ExitMark other) throws MarkingError {
-		switch (m.numOfMark) {
-		case NotYet:
-			switch (other.numOfMark) {
-			case NotYet:
-				throw new MarkingError("An ExitMarking should not be set");
-			case One:
-				GenVec s1 = mg.get(m.emark);
-				GenVec s2 = mg.get(other.emark);
+	public static ExitMark union(Map<Mark,GenVec> mg, ExitMark parent, ExitMark child) throws MarkingError {
+		switch (parent.status) {
+		case Init:
+			switch (child.status) {
+			case Init:
+				throw new  MarkingError("ExitMarking: The status of child is Init");
+			case Vanishable:
+			case NoVanishable:
+				GenVec s1 = mg.get(parent.emark);
+				GenVec s2 = mg.get(child.emark);
 				if (s1.isSameClass(s2)) {
-					return new ExitMark(other.emark, NumOfExitMarks.One, true);
+					return new ExitMark(child.emark, StatusOfExitMarks.Vanishable);
 				} else {
-					return new ExitMark(m.emark, NumOfExitMarks.One, false);
+					return new ExitMark(parent.emark, StatusOfExitMarks.NoVanishable);
 				}
-			case MoreThanOne:
-				return new ExitMark(null, NumOfExitMarks.MoreThanOne, false);
 			}
-			break;
-		case One:
-			switch (other.numOfMark) {
-			case NotYet:
-				throw new MarkingError("An ExitMarking should not be set");
-			case One:
-				if (m.emark != other.emark) {
-					return new ExitMark(null, NumOfExitMarks.MoreThanOne, false);
+		case Vanishable:
+			switch (child.status) {
+			case Init:
+				throw new  MarkingError("ExitMarking: The status of child is Init");
+			case Vanishable:
+			case NoVanishable:
+				if (parent.emark == child.emark) {
+					return parent;
 				} else {
-					return other;
+					return new ExitMark(parent.emark, StatusOfExitMarks.NoVanishable);
 				}
-			case MoreThanOne:
-				return other;
 			}
-		case MoreThanOne:
-			return m;
+		case NoVanishable:
+			return parent;
 		}
 		throw new MarkingError("A general error in ExitMarking");
 	}
 
 	private final Mark emark;
-	private final NumOfExitMarks numOfMark;
-	private final boolean vanishing;
+	private final StatusOfExitMarks status;
 	
-	private ExitMark(Mark emark, NumOfExitMarks numOfMark, boolean vanishing) {
+	private ExitMark(Mark emark, StatusOfExitMarks status) {
 		this.emark = emark;
-		this.numOfMark = numOfMark;
-		this.vanishing = vanishing;
+		this.status = status;
 	}
 	
 	public final Mark get() {
@@ -74,7 +69,7 @@ class ExitMark {
 	}
 	
 	public final boolean canVanishing() {
-		return vanishing;
+		return status == StatusOfExitMarks.Vanishable;
 	}
 	
 }

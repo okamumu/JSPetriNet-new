@@ -126,7 +126,8 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -142,7 +143,8 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -158,7 +160,8 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
+		if (logger.isTraceEnabled())
+			logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
 	}
 
 	/**
@@ -253,7 +256,8 @@ public class DFS implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
+			if (logger.isTraceEnabled())
+				logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {

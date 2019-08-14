@@ -25,6 +25,7 @@ public class MarkingGraph {
 		Collections.sort(mg.allmark);
 		for (Map.Entry<GenVec,List<Mark>> entry : mg.markSet.entrySet()) {
 			mg.genvecSize.put(entry.getKey(), entry.getValue().size());
+			Collections.sort(entry.getValue());
 		}
 		return mg;
 	}

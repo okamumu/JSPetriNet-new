@@ -77,7 +77,7 @@ public class PetriNetMarkingTest2 {
     	try {
     		Net net = FactoryPN.getInstance().compilePN(env);
     		PrintWriter bw = new PrintWriter(System.out);
-        	PNWriter.write(bw, net, env);
+        	PNWriter.write(net, env);
         	bw.flush();
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
@@ -92,7 +92,7 @@ public class PetriNetMarkingTest2 {
     		PrintWriter bw = new PrintWriter(System.out);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(bw, net, mg);
+			MarkWriter.writeMark(net, mg);
         	bw.flush();
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
@@ -106,7 +106,7 @@ public class PetriNetMarkingTest2 {
     		Net net = FactoryPN.getInstance().compilePN(env);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkingMatrix mat = new MarkingMatrix(net, env, mg, 0);
+			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			for (Map.Entry<GTuple,ASTMatrix> m : mat.getMatrixSet().entrySet()) {
 				System.out.println(Arrays.toString(m.getValue().getI()));
 				System.out.println(Arrays.toString(m.getValue().getJ()));
