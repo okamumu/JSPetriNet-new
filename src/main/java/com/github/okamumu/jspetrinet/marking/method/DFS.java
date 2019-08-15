@@ -32,6 +32,10 @@ import com.github.okamumu.jspetrinet.petri.nodes.Trans;
  */
 public class DFS implements CreateMarking {
 	
+	private int imm;
+	private int gen;
+	private int abs;
+
 	private MarkingGraph markGraph;
 
 	private final Map<Mark,Mark> createdMarks;
@@ -56,6 +60,9 @@ public class DFS implements CreateMarking {
 	
 	@Override
 	public void create(MarkingGraph mg, Mark init, Net net, ASTEnv env) throws JSPNException {
+		imm = 0;
+		gen = 0;
+		abs = 0;
 		markGraph = mg;
 		createdMarks.put(init, init);
 		novisited.push(init);
@@ -126,8 +133,11 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled())
+		if (logger.isTraceEnabled()) {
 			logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
+			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
+		}
+		imm++;
 	}
 
 	/**
@@ -143,8 +153,11 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled())
+		if (logger.isTraceEnabled()) {
 			logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
+			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
+		}
+		gen++;
 	}
 
 	/**
@@ -160,8 +173,11 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled())
+		if (logger.isTraceEnabled()) {
 			logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
+			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
+		}
+		abs++;
 	}
 
 	/**

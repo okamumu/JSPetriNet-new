@@ -166,11 +166,21 @@ public class PetriNetTestFromFile {
 	}
 
 	@Test
+	@Ignore
 	public void test05() {
     	String file = "example/spnp_example5";
     	Env env = new Env();
     	Net net = this.exampleMake(file, env);
     	this.example(file, net, env);
+    	this.exampleTangible(file, net, env);
+	}
+
+	@Test
+	public void test06() {
+    	String file = "example/spnp_example6";
+    	Env env = new Env();
+    	Net net = this.exampleMake(file, env);
+//    	this.example(file, net, env);
     	this.exampleTangible(file, net, env);
 	}
 }

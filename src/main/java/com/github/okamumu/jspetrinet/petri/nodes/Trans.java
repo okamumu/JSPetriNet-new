@@ -138,7 +138,7 @@ abstract public class Trans extends Node implements Comparable<Trans> {
 		if (result instanceof Boolean) {
 			return (Boolean) result;
 		} else {
-			throw new InvalidOperation("The guard function should return a boolean");
+			throw new InvalidOperation("The guard function should return a boolean:" + guard.toString());
 		}
 	}
 

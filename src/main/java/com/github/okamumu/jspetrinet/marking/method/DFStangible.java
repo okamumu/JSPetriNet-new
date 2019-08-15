@@ -43,6 +43,7 @@ public class DFStangible implements CreateMarking {
 	private static final Mark endMark = new Mark(null);
 	
 	private MarkingGraph markGraph;
+	private Net net;
 
 	private final Map<Mark,Mark> createdMarks;
 	private final Map<GenVec,GenVec> genvecSet;
@@ -74,6 +75,7 @@ public class DFStangible implements CreateMarking {
 	
 	@Override
 	public void create(MarkingGraph mg, Mark init, Net net, ASTEnv env) throws JSPNException {
+		this.net = net;
 		markGraph = mg;
 		createdMarks.put(init, init);
 		novisited.push(init);
@@ -283,9 +285,14 @@ public class DFStangible implements CreateMarking {
 			/**
 			 * If m is endMark,
 			 * it finishes exploring children of the top of stack markPath.
+			 * The child exit should be merged to the parent.
 			 */
 			if (m == endMark) {
 				Mark e = markPath.pop();
+				Mark r = markPath.peek();
+				if (r != null) {
+					margeExitSet(r, e);
+				}
 				visited.add(e);
 				continue;
 			}
