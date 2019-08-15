@@ -42,11 +42,14 @@ public class PetriNetCompileTest2 {
     	str.append("arc Tarrival to Pservice\n");
     	str.append("arc Pservice to Tservice\n");
     	str.append("reward cumstomers #Pservice\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
-    	bw.flush();
+		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
+		} catch (InvalidDefinition | ASTException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
     @Test
@@ -60,12 +63,10 @@ public class PetriNetCompileTest2 {
     	str.append("arc Tarrival to Pservice\n");
     	str.append("arc Pservice to Tservice\n");
     	str.append("reward cumstomers #Pservice\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
-    	bw.flush();
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
@@ -92,7 +93,7 @@ public class PetriNetCompileTest2 {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.build(str.toString(), env);
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
 			PrintWriter bw = new PrintWriter(System.out);
 	    	PNWriter.write(net, env);
 	    	bw.flush();
@@ -123,7 +124,7 @@ public class PetriNetCompileTest2 {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.build(str.toString(), env);
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
 			PrintWriter bw = new PrintWriter(System.out);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());

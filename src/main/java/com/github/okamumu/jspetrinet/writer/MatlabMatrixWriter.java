@@ -59,9 +59,9 @@ public class MatlabMatrixWriter {
 	private MATLABMatFile createMatlabMatrix(ASTEnv env, MarkingMatrix mat) throws ASTException {
 		MATLABMatFile matfile = new MATLABMatFile(MATLABEndian.LittleEndian);
 		for (Map.Entry<GTuple,ASTMatrix> m : mat.getMatrixSet().entrySet()) {
-			String label = mat.getGenVecLabel().get(m.getKey().getSrc())
-					+ mat.getGenVecLabel().get(m.getKey().getDest())
-					+ mat.getGenTransLabel().get(m.getKey().getGenTrans());
+			String label = mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc())
+					+ mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getDest())
+					+ mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans());
 			ASTMatrix am = m.getValue();
 			matfile.addDataElement(MATLABDataElement.doubleSparseMatrix(label,
 					new int[] {am.getISize(), am.getJSize()},
@@ -73,8 +73,8 @@ public class MatlabMatrixWriter {
 			}
 		}
 		for (Map.Entry<GTuple,ASTVector> v : mat.getSumVectorSet().entrySet()) {
-			String label = "sum" + mat.getGenVecLabel().get(v.getKey().getSrc())
-					+ mat.getGenTransLabel().get(v.getKey().getGenTrans());
+			String label = "sum" + mat.getMarkingGraph().getGenVecLabel().get(v.getKey().getSrc())
+					+ mat.getMarkingGraph().getGenTransLabel().get(v.getKey().getGenTrans());
 			ASTVector av = v.getValue();
 			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
 					new int[] {1,av.getSize()}, av.getValue(env)));			
@@ -84,7 +84,7 @@ public class MatlabMatrixWriter {
 			}
 		}
 		for (Map.Entry<GenVec,ASTVector> v : mat.getInitVectorSet().entrySet()) {
-			String label = "init" + mat.getGenVecLabel().get(v.getKey());
+			String label = "init" + mat.getMarkingGraph().getGenVecLabel().get(v.getKey());
 			ASTVector av = v.getValue();
 			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
 					new int[] {1,av.getSize()}, av.getValue(env)));
@@ -95,7 +95,7 @@ public class MatlabMatrixWriter {
 		}
 		for (Map.Entry<GStringTuple,ASTVector> v : mat.getRewardVectorSet().entrySet()) {
 			String label = v.getKey().getGenString()
-					+ mat.getGenVecLabel().get(v.getKey().getGenVec());
+					+ mat.getMarkingGraph().getGenVecLabel().get(v.getKey().getGenVec());
 			ASTVector av = v.getValue();
 			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
 					new int[] {1,av.getSize()}, av.getValue(env)));

@@ -42,11 +42,11 @@ public class StateWriter {
 
 	private void writeState(Net net, MarkingGraph mp, MarkingMatrix mat, PrintWriter bw) {
 		for (GenVec g : mp.getGenVec()) {
-			String s = mat.getGenVecLabel().get(g) + " " + makeLabel(net, g);
+			String s = mat.getMarkingGraph().getGenVecLabel().get(g) + " " + makeLabel(net, g);
 			bw.println(s);
 			if (logger.isTraceEnabled()) logger.trace(s);
 			for (Mark m : mp.getMarkSet().get(g)) {
-				String str = "" + mat.getMarkIndex().get(m) + " " + makeLabel(net, m);
+				String str = "" + mat.getMarkingGraph().getMarkIndex().get(m) + " " + makeLabel(net, m);
 				bw.println(str);
 				if (logger.isTraceEnabled()) logger.trace(str);
 			}

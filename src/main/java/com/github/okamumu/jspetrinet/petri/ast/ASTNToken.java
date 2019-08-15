@@ -45,7 +45,7 @@ public class ASTNToken implements AST {
 				Place place = (Place) p;
 				return analysis.getNToken(env, place);
 			} else {
-				throw new InvalidOperation("NToken error");
+				throw new InvalidOperation("NToken error: " + p + " is not place.");
 			}
 		} catch (ObjectNotFoundInASTEnv e) {
 			return new NaN(this);

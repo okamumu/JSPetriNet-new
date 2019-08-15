@@ -1,6 +1,11 @@
 package com.github.okamumu.jspetrinet.writer;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import com.github.okamumu.jspetrinet.graph.Arc;
 import com.github.okamumu.jspetrinet.marking.GenVec;
@@ -18,7 +23,7 @@ public class MarkWriter {
 
 	private static String ln = "\n";
 	private static String genFormat = "\"%s\" [label=\"%s\n %s\"];" + ln;
-	private static String immFormat = "\"%s\" [label=\"%s\n %s\"];" + ln;
+	private static String immFormat = "\"%s\" [label=\"%s\n %s\", style=filled];" + ln;
 	private static String arcFormat = "\"%s\" -> \"%s\" [label=\"%s\"];" + ln;
 
 	private static String genFormatG = "\"%s\" [label=\"%s\n(%d)\"];" + ln;
@@ -38,6 +43,21 @@ public class MarkWriter {
 	}
 	
 	/**
+	 * Write a graph of marking (file)
+	 * @param file A name of file
+	 * @param net An instance of Net
+	 * @param mgraph An instance of MarkingGraph
+	 * @throws IOException An error on file IO
+	 */
+	public static void writeMark(String file, Net net, MarkingGraph mgraph) throws IOException {
+		BufferedWriter buf = Files.newBufferedWriter(Paths.get(file), StandardCharsets.UTF_8);
+		PrintWriter bw = new PrintWriter(buf, false);
+		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		pviz.dotMark();
+		bw.close();
+	}
+
+	/**
 	 * Write a graph of Group of marking (System.out)
 	 * @param net An instance of Net
 	 * @param mgraph An instance of MarkingGraph
@@ -46,6 +66,21 @@ public class MarkWriter {
 		PrintWriter bw = new PrintWriter(System.out, true);
 		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
 		pviz.dotMarkGroup();
+	}
+
+	/**
+	 * Write a graph of Group of marking (file)
+	 * @param file A name of file
+	 * @param net An instance of Net
+	 * @param mgraph An instance of MarkingGraph
+	 * @throws IOException An error on file IO
+	 */
+	public static void writeMarkGroup(String file, Net net, MarkingGraph mgraph) throws IOException {
+		BufferedWriter buf = Files.newBufferedWriter(Paths.get(file), StandardCharsets.UTF_8);
+		PrintWriter bw = new PrintWriter(buf, false);
+		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		pviz.dotMarkGroup();
+		bw.close();
 	}
 
 	private MarkWriter(Net net, MarkingGraph mgraph, PrintWriter bw) {
@@ -103,45 +138,48 @@ public class MarkWriter {
 	}
 
 	private String makeLabel(Mark m) {
-			String result = "";
-			for (Place p : net.getPlaceSet()) {
-				if (m.get(p.getIndex()) != 0) {
-					if (result.equals("")) {
-						result = p.getLabel() + ":" + m.get(p.getIndex());						
-					} else {
-						result = result + "," + p.getLabel() + ":" + m.get(p.getIndex());						
-					}
-				}
-			}
-			return result;
+		return mgraph.getMarkIndex().get(m).toString();
+		// detal version
+//			String result = "";
+//			for (Place p : net.getPlaceSet()) {
+//				if (m.get(p.getIndex()) != 0) {
+//					if (result.equals("")) {
+//						result = p.getLabel() + ":" + m.get(p.getIndex());						
+//					} else {
+//						result = result + "," + p.getLabel() + ":" + m.get(p.getIndex());						
+//					}
+//				}
+//			}
+//			return result;
 		}
 
 	private String makeLabel(GenVec genv) {
-		String result = "(";
-		for (GenTrans t: net.getGenTransSet()) {
-			switch(genv.get(t.getIndex())) {
-			case 0:
-				break;
-			case 1:
-				if (!result.equals("(")) {
-					result += " ";
-				}
-				result += t.getLabel() + "->enable";
-				break;
-			case 2:
-				if (!result.equals("(")) {
-					result += " ";
-				}
-				result += t.getLabel() + "->preemption";
-				break;
-			default:
-				break;
-			}
-		}
-		if (result.equals("(")) {
-			result += "EXP";
-		}
-		result += ")";
-		return result;
+		return mgraph.getGenVecLabel().get(genv);
+//		String result = "(";
+//		for (GenTrans t: net.getGenTransSet()) {
+//			switch(genv.get(t.getIndex())) {
+//			case 0:
+//				break;
+//			case 1:
+//				if (!result.equals("(")) {
+//					result += " ";
+//				}
+//				result += t.getLabel() + "->enable";
+//				break;
+//			case 2:
+//				if (!result.equals("(")) {
+//					result += " ";
+//				}
+//				result += t.getLabel() + "->preemption";
+//				break;
+//			default:
+//				break;
+//			}
+//		}
+//		if (result.equals("(")) {
+//			result += "EXP";
+//		}
+//		result += ")";
+//		return result;
 	}
 }

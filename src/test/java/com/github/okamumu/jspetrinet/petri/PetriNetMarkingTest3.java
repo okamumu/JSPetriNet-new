@@ -141,9 +141,9 @@ public class PetriNetMarkingTest3 {
 				}				
 			}
 			for (Map.Entry<GTuple,ASTMatrix> m : mat.getMatrixSet().entrySet()) {
-				System.out.print(mat.getGenVecLabel().get(m.getKey().getSrc()));
-				System.out.print(mat.getGenVecLabel().get(m.getKey().getDest()));
-				System.out.println(mat.getGenTransLabel().get(m.getKey().getGenTrans()));
+				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc()));
+				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getDest()));
+				System.out.println(mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans()));
 				System.out.print(m.getKey().getSrc().getString(net));
 				System.out.print(" => ");
 				System.out.print(m.getKey().getDest().getString(net));
@@ -156,8 +156,8 @@ public class PetriNetMarkingTest3 {
 				System.out.println(Arrays.toString(m.getValue().getValue(env)));
 			}
 			for (Map.Entry<GTuple,ASTVector> m : mat.getSumVectorSet().entrySet()) {
-				System.out.print(mat.getGenVecLabel().get(m.getKey().getSrc()));
-				System.out.println(mat.getGenTransLabel().get(m.getKey().getGenTrans()));
+				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc()));
+				System.out.println(mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans()));
 				System.out.print(m.getKey().getSrc().getString(net));
 				System.out.println(" Trans:" + m.getKey().getGenTrans());
 				System.out.println(Arrays.toString(m.getValue().getValue(env)));

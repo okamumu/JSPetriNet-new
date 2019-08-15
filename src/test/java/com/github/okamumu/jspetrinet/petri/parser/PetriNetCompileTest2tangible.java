@@ -43,12 +43,10 @@ public class PetriNetCompileTest2tangible {
     	str.append("arc Tarrival to Pservice\n");
     	str.append("arc Pservice to Tservice\n");
     	str.append("reward cumstomers #Pservice\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
-    	bw.flush();
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
@@ -75,10 +73,8 @@ public class PetriNetCompileTest2tangible {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.build(str.toString(), env);
-			PrintWriter bw = new PrintWriter(System.out);
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
 	    	PNWriter.write(net, env);
-	    	bw.flush();
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
@@ -106,7 +102,7 @@ public class PetriNetCompileTest2tangible {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.build(str.toString(), env);
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
 			PrintWriter bw = new PrintWriter(System.out);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());

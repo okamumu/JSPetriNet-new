@@ -12,6 +12,7 @@ import java.util.Set;
 
 import com.github.okamumu.jspetrinet.ast.AST;
 import com.github.okamumu.jspetrinet.ast.ASTEnv;
+import com.github.okamumu.jspetrinet.ast.values.ASTNull;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.graph.Arc;
 import com.github.okamumu.jspetrinet.petri.Net;
@@ -69,6 +70,7 @@ public class PNWriter {
 		PrintWriter bw = new PrintWriter(buf, false);
 		PNWriter pviz = new PNWriter(net, env, bw);
 		pviz.doDraw();
+		bw.close();
 	}
 
 	private PNWriter(Net net, ASTEnv env, PrintWriter bw) {
@@ -165,24 +167,22 @@ public class PNWriter {
 
 		// guard
 		AST guard = tr.getGuard();
-		if (guard != null) {
-			try {
-				Object obj = guard.eval(env);
-				if (obj instanceof Boolean) {
-					if ((Boolean) obj != true) {
-						label += ln + "[" + obj.toString() + "]";
-					}
-				} else {
+		try {
+			Object obj = guard.eval(env);
+			if (obj instanceof Boolean) {
+				if ((Boolean) obj != true) {
 					label += ln + "[" + obj.toString() + "]";
 				}
-			} catch (ASTException e) {
-				label += ln + "[" + guard.toString() + "]";
+			} else {
+				label += ln + "[" + obj.toString() + "]";
 			}
+		} catch (ASTException e) {
+			label += ln + "[" + guard.toString() + "]";
 		}
 		
 		// update
 		AST update = tr.getUpdate();
-		if (update != null) {
+		if (!(update instanceof ASTNull)) {
 			label += ln + "{" + update.toString() + "}";
 		}
 		

@@ -23,13 +23,17 @@ public final class Env implements ASTEnv {
 	public Env() {
 		hash = new HashMap<String,Object>();
 	}
+	
+	public void remove(String label) {
+		hash.remove(label);
+	}
 
 	@Override
 	public String toString() {
 		String linesep = System.getProperty("line.separator").toString();
 		String res = "Defined labels:" + linesep;
 		for (String s: hash.keySet()) {
-			res += s + "; ";
+			res += s + ";\n";
 		}
 		return res;
 	}

@@ -1,6 +1,7 @@
 package com.github.okamumu.jspetrinet.marking;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,12 +15,14 @@ import com.github.okamumu.jspetrinet.exception.JSPNException;
 import com.github.okamumu.jspetrinet.graph.Arc;
 import com.github.okamumu.jspetrinet.marking.method.CreateMarking;
 import com.github.okamumu.jspetrinet.petri.Net;
+import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 
 public class MarkingGraph {
 
 	public static MarkingGraph create(Mark init, Net net, ASTEnv env, CreateMarking method) throws JSPNException {
-		MarkingGraph mg = new MarkingGraph(init);
-		method.create(mg, init, net, env);
+		Mark init0 = new Mark(init.copy());
+		MarkingGraph mg = new MarkingGraph(init0);
+		method.create(mg, init0, net, env);
 		mg.makingGroupGraph();
 		Collections.sort(mg.allgenvec);
 		Collections.sort(mg.allmark);
@@ -27,6 +30,9 @@ public class MarkingGraph {
 			mg.genvecSize.put(entry.getKey(), entry.getValue().size());
 			Collections.sort(entry.getValue());
 		}
+		mg.createGenVecLabel();
+		mg.createGenTransLabel(net);
+		mg.createIndexForMarks(0);
 		return mg;
 	}
 
@@ -37,6 +43,10 @@ public class MarkingGraph {
 	private final List<GenVec> allgenvec;
 	private final List<Mark> allmark;
 
+	private final Map<Mark,Integer> markIndex;
+	private final Map<GenVec,String> genvecLabel;
+	private final Map<GenTrans,String> genTransLabel;
+
 	private MarkingGraph(Mark imark) {
 		markToGenvec = new HashMap<Mark,GenVec>();
 		genvecSize = new HashMap<GenVec,Integer>();
@@ -44,6 +54,9 @@ public class MarkingGraph {
 		allgenvec = new ArrayList<GenVec>();
 		allmark = new ArrayList<Mark>();
 		this.imark = imark;
+		markIndex = new HashMap<Mark,Integer>();
+		genvecLabel = new HashMap<GenVec,String>();
+		genTransLabel = new HashMap<GenTrans,String>();
 	}
 
 	public final int immSize() {
@@ -98,6 +111,30 @@ public class MarkingGraph {
 	
 	public final Map<GenVec,List<Mark>> getMarkSet() {
 		return markSet;
+	}
+
+	/**
+	 * Getter for a map from GenVec to String (G0, I0, etc.)
+	 * @return A map
+	 */
+	public Map<GenVec,String> getGenVecLabel() {
+		return genvecLabel;
+	}
+	
+	/**
+	 * Getter for a string corresponding to general transition (P0, P1, etc.)
+	 * @return A map
+	 */
+	public Map<GenTrans,String> getGenTransLabel() {
+		return genTransLabel;
+	}
+
+	/**
+	 * Getter for a map from a mark to an index
+	 * @return A map
+	 */
+	public Map<Mark,Integer> getMarkIndex() {
+		return markIndex;
 	}
 
 	public final void setGenVec(Mark m, GenVec g) {
@@ -155,4 +192,64 @@ public class MarkingGraph {
 		}
 	}
 
+	/**
+	 * Create labels for GenVec groups (G0, G1, I0, A0, etc.)
+	 * @param mp An instance of marking graph
+	 */
+	private void createGenVecLabel() {
+		Map<String,Integer> index = new HashMap<String,Integer>();
+		int next_index = 0;
+		for (GenVec g : getGenVec()) {
+			String key = Arrays.toString(g.copy());
+			if (!index.containsKey(key)) {
+				index.put(key, next_index);
+				next_index++;
+			}
+			Integer i = index.get(key);
+			switch(g.getType()) {
+			case IMM:
+				genvecLabel.put(g, "I" + i);
+				break;
+			case GEN:
+				genvecLabel.put(g, "G" + i);
+				break;
+			case ABS:
+				genvecLabel.put(g, "A" + i);
+				break;
+			default:
+			}
+		}
+	}
+
+	/**
+	 * Create labels for gentrans (E, P0, P1, etc.)
+	 * @param net An instance of Net
+	 */
+	private void createGenTransLabel(Net net) {
+		int index = 0;
+		genTransLabel.put(null, "E");
+		for (GenTrans tr : net.getGenTransSet()) {
+			genTransLabel.put(tr, "P" + index);
+		}
+	}
+
+	/**
+	 * Make indices of markings for each groups.
+	 * The index starts with baseIndex
+	 * @param baseIndex An integer to represent the baseIndex
+	 */
+	private void createIndexForMarks(int baseIndex) {
+		Map<GenVec,List<Mark>> markSet = new HashMap<GenVec,List<Mark>>();
+		for (Mark m : getMark()) {
+			GenVec genv = getGenVec(m);
+			if (!markSet.containsKey(genv)) {
+				List<Mark> list = new ArrayList<Mark>();
+				markSet.put(genv, list);				
+			}
+			List<Mark> list = markSet.get(genv);
+			markIndex.put(m, baseIndex + list.size());
+			markSet.get(genv).add(m);
+		}
+	}
+	
 }

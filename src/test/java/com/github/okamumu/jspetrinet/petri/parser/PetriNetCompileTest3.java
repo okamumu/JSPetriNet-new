@@ -48,11 +48,10 @@ public class PetriNetCompileTest3 {
     	str.append("arc P3 to T2\n");
     	str.append("arc T2 to P4\n");
     	str.append("harc P3 to T1\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -64,7 +63,6 @@ public class PetriNetCompileTest3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	bw.flush();
 	}
 
     @Test
@@ -82,12 +80,10 @@ public class PetriNetCompileTest3 {
     	str.append("reward cumstomers #Pservice\n");
     	str.append("lambda = 0.1\n");
     	str.append("mu = 1\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
-    	bw.flush();
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -99,7 +95,6 @@ public class PetriNetCompileTest3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	bw.flush();
 	}
 
     @Test
@@ -118,11 +113,10 @@ public class PetriNetCompileTest3 {
     	str.append("arc T2 to P3\n");
     	str.append("arc P2 to T3\n");
     	str.append("arc T3 to P4\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -134,7 +128,6 @@ public class PetriNetCompileTest3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	bw.flush();
 	}
 
     @Test
@@ -153,11 +146,10 @@ public class PetriNetCompileTest3 {
     	str.append("arc T2 to P3\n");
     	str.append("arc P2 to T3\n");
     	str.append("arc T3 to P4\n");
-    	Env env = new Env();
-    	Net net = NetBuilder.build(str.toString(), env);
-		PrintWriter bw = new PrintWriter(System.out);
-    	PNWriter.write(net, env);
 		try {
+	    	Env env = new Env();
+	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -170,6 +162,5 @@ public class PetriNetCompileTest3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-    	bw.flush();
 	}
 }

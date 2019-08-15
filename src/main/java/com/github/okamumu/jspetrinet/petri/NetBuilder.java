@@ -2,6 +2,8 @@ package com.github.okamumu.jspetrinet.petri;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -33,32 +35,17 @@ import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
 public class NetBuilder {
 
-	static public Net build(InputStream in, ASTEnv env) {
+	static public Net buildFromFile(String file, ASTEnv env) throws InvalidDefinition, ASTException, IOException {
+		InputStream is = Files.newInputStream(Paths.get(file));
 		NetBuilder builder = new NetBuilder(env);
-		try {
-			builder.parseProg(in);
-    		return FactoryPN.getInstance().compilePN(env);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (InvalidDefinition e) {
-			e.printStackTrace();
-		} catch (ASTException e) {
-			e.printStackTrace();
-		}
-		return null;
+		builder.parseProg(is);
+    	return FactoryPN.getInstance().compilePN(env);
 	}
 
-	static public Net build(String in, ASTEnv env) {
+	static public Net buildFromString(String in, ASTEnv env) throws InvalidDefinition, ASTException {
 		NetBuilder builder = new NetBuilder(env);
 		builder.parseProg(in);
-		try {
-    		return FactoryPN.getInstance().compilePN(env);
-		} catch (InvalidDefinition e) {
-			e.printStackTrace();
-		} catch (ASTException e) {
-			e.printStackTrace();
-		}
-		return null;
+		return FactoryPN.getInstance().compilePN(env);
 	}
 
 	static public AST buildExpression(String in) {

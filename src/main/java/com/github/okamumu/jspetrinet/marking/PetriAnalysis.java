@@ -17,7 +17,7 @@ import com.github.okamumu.jspetrinet.petri.nodes.Trans;
 
 public final class PetriAnalysis {
 	
-	public final static String currentMarkingString = "*currentMarking*";
+	public final static String currentMarkingString = "__currentMarking__";
 	private final Logger logger;
 
     public static class PetriAnalysisInstanceHolder {

@@ -1,9 +1,6 @@
 package com.github.okamumu.jspetrinet.matrix;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.github.okamumu.jspetrinet.ast.AST;
@@ -36,10 +33,10 @@ public class MarkingMatrix {
 	 * @throws ASTException An exception when AST to numeric
 	 */
 	public static MarkingMatrix create(Net net, ASTEnv env, MarkingGraph mp, int baseIndex) throws ASTException {
-		MarkingMatrix mm = new MarkingMatrix();
-		mm.createGenVecLabel(mp);
-		mm.createGenTransLabel(net);
-		mm.createIndexForMarks(mp, baseIndex);
+		MarkingMatrix mm = new MarkingMatrix(mp);
+//		mm.createGenVecLabel(mp);
+//		mm.createGenTransLabel(net);
+//		mm.createIndexForMarks(mp, baseIndex);
 		mm.createTransitionMatrix(env, mp);
 		mm.createInitVector(mp);
 		mm.createRewardVector(net, env, mp);		
@@ -47,10 +44,10 @@ public class MarkingMatrix {
 	}
 
 	private final PetriAnalysis analysis;
-	
-	private final Map<Mark,Integer> markIndex;
-	private final Map<GenVec,String> genvecLabel;
-	private final Map<GenTrans,String> genTransLabel;
+	private final MarkingGraph mp;
+//	private final Map<Mark,Integer> markIndex;
+//	private final Map<GenVec,String> genvecLabel;
+//	private final Map<GenTrans,String> genTransLabel;
 	private final Map<GTuple,ASTMatrix> matrixSet;
 	private final Map<GTuple,ASTVector> sumvecSet;
 	private final Map<GenVec,ASTVector> initvecSet;
@@ -59,10 +56,11 @@ public class MarkingMatrix {
 	/**
 	 * Constructor
 	 */
-	private MarkingMatrix() {
-		markIndex = new HashMap<Mark,Integer>();
-		genvecLabel = new HashMap<GenVec,String>();
-		genTransLabel = new HashMap<GenTrans,String>();
+	private MarkingMatrix(MarkingGraph mp) {
+		this.mp = mp;
+//		markIndex = new HashMap<Mark,Integer>();
+//		genvecLabel = new HashMap<GenVec,String>();
+//		genTransLabel = new HashMap<GenTrans,String>();
 		matrixSet = new HashMap<GTuple,ASTMatrix>();
 		sumvecSet = new HashMap<GTuple,ASTVector>();
 		initvecSet = new HashMap<GenVec,ASTVector>();
@@ -71,29 +69,13 @@ public class MarkingMatrix {
 	}
 	
 	/**
-	 * Getter for a map from GenVec to String (G0, I0, etc.)
-	 * @return A map
-	 */
-	public Map<GenVec,String> getGenVecLabel() {
-		return genvecLabel;
+	 * Getter for a marking graph
+	 * @return An instance of marking graph
+	 */	
+	public MarkingGraph getMarkingGraph() {
+		return mp;
 	}
 	
-	/**
-	 * Getter for a string corresponding to general transition (P0, P1, etc.)
-	 * @return A map
-	 */
-	public Map<GenTrans,String> getGenTransLabel() {
-		return genTransLabel;
-	}
-
-	/**
-	 * Getter for a map from a mark to an index
-	 * @return A map
-	 */
-	public Map<Mark,Integer> getMarkIndex() {
-		return markIndex;
-	}
-
 	/**
 	 * Getter for a map from Gtuple (GenVec, GenVec, GenTrans) to ASTMatrix.
 	 * This is used to get Map.Entry
@@ -130,66 +112,66 @@ public class MarkingMatrix {
 		return rewardvecSet;
 	}
 
-	/**
-	 * Create labels for GenVec groups (G0, G1, I0, A0, etc.)
-	 * @param mp An instance of marking graph
-	 */
-	private void createGenVecLabel(MarkingGraph mp) {
-		Map<String,Integer> index = new HashMap<String,Integer>();
-		int next_index = 0;
-		for (GenVec g : mp.getGenVec()) {
-			String key = Arrays.toString(g.copy());
-			if (!index.containsKey(key)) {
-				index.put(key, next_index);
-				next_index++;
-			}
-			Integer i = index.get(key);
-			switch(g.getType()) {
-			case IMM:
-				genvecLabel.put(g, "I" + i);
-				break;
-			case GEN:
-				genvecLabel.put(g, "G" + i);
-				break;
-			case ABS:
-				genvecLabel.put(g, "A" + i);
-				break;
-			default:
-			}
-		}
-	}
-
-	/**
-	 * Create labels for gentrans (E, P0, P1, etc.)
-	 * @param net An instance of Net
-	 */
-	private void createGenTransLabel(Net net) {
-		int index = 0;
-		genTransLabel.put(null, "E");
-		for (GenTrans tr : net.getGenTransSet()) {
-			genTransLabel.put(tr, "P" + index);
-		}
-	}
-
-	/**
-	 * Make indices of markings for each groups.
-	 * The index starts with baseIndex
-	 * @param mp An instance of marking graph
-	 * @param baseIndex An integer to represent the baseIndex
-	 */
-	private void createIndexForMarks(MarkingGraph mp, int baseIndex) {
-		Map<GenVec,List<Mark>> markSet = new HashMap<GenVec,List<Mark>>();
-		for (Mark m : mp.getMark()) {
-			GenVec genv = mp.getGenVec(m);
-			if (!markSet.containsKey(genv)) {
-				List<Mark> list = new ArrayList<Mark>();
-				markSet.put(genv, list);				
-			}
-			List<Mark> list = markSet.get(genv);
-			markIndex.put(m, baseIndex + list.size());
-			markSet.get(genv).add(m);
-		}
-	}
+//	/**
+//	 * Create labels for GenVec groups (G0, G1, I0, A0, etc.)
+//	 * @param mp An instance of marking graph
+//	 */
+//	private void createGenVecLabel(MarkingGraph mp) {
+//		Map<String,Integer> index = new HashMap<String,Integer>();
+//		int next_index = 0;
+//		for (GenVec g : mp.getGenVec()) {
+//			String key = Arrays.toString(g.copy());
+//			if (!index.containsKey(key)) {
+//				index.put(key, next_index);
+//				next_index++;
+//			}
+//			Integer i = index.get(key);
+//			switch(g.getType()) {
+//			case IMM:
+//				mp.genvecLabel.put(g, "I" + i);
+//				break;
+//			case GEN:
+//				genvecLabel.put(g, "G" + i);
+//				break;
+//			case ABS:
+//				genvecLabel.put(g, "A" + i);
+//				break;
+//			default:
+//			}
+//		}
+//	}
+//
+//	/**
+//	 * Create labels for gentrans (E, P0, P1, etc.)
+//	 * @param net An instance of Net
+//	 */
+//	private void createGenTransLabel(Net net) {
+//		int index = 0;
+//		genTransLabel.put(null, "E");
+//		for (GenTrans tr : net.getGenTransSet()) {
+//			genTransLabel.put(tr, "P" + index);
+//		}
+//	}
+//
+//	/**
+//	 * Make indices of markings for each groups.
+//	 * The index starts with baseIndex
+//	 * @param mp An instance of marking graph
+//	 * @param baseIndex An integer to represent the baseIndex
+//	 */
+//	private void createIndexForMarks(MarkingGraph mp, int baseIndex) {
+//		Map<GenVec,List<Mark>> markSet = new HashMap<GenVec,List<Mark>>();
+//		for (Mark m : mp.getMark()) {
+//			GenVec genv = mp.getGenVec(m);
+//			if (!markSet.containsKey(genv)) {
+//				List<Mark> list = new ArrayList<Mark>();
+//				markSet.put(genv, list);				
+//			}
+//			List<Mark> list = markSet.get(genv);
+//			markIndex.put(m, baseIndex + list.size());
+//			markSet.get(genv).add(m);
+//		}
+//	}
 	
 	/**
 	 * Create transition matrices and their row sums for each group.
@@ -210,8 +192,8 @@ public class MarkingMatrix {
 					ImmTrans tr = (ImmTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, null);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, null);
-					Integer i = markIndex.get(src);
-					Integer j = markIndex.get(dest);
+					Integer i = mp.getMarkIndex().get(src);
+					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);
 					AST value = ASTValue.getAST(analysis.astEval(tr.getWeight(), src, env));
@@ -221,8 +203,8 @@ public class MarkingMatrix {
 					ExpTrans tr = (ExpTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, null);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, null);
-					Integer i = markIndex.get(src);
-					Integer j = markIndex.get(dest);
+					Integer i = mp.getMarkIndex().get(src);
+					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);
 					AST value = ASTValue.getAST(analysis.astEval(tr.getRate(), src, env));
@@ -232,8 +214,8 @@ public class MarkingMatrix {
 					GenTrans tr = (GenTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, tr);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, tr);
-					Integer i = markIndex.get(src);
-					Integer j = markIndex.get(dest);
+					Integer i = mp.getMarkIndex().get(src);
+					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);
 					AST value = ASTValue.getAST(1);
@@ -291,7 +273,7 @@ public class MarkingMatrix {
 		for (GenVec genv : mp.getGenVec()) {
 			ASTVector vec = new ASTVector(mp.getGenVecSize(genv));
 			if (mp.getGenVec(init).equals(genv)) {
-				vec.set(this.markIndex.get(init), ASTValue.getAST(1.0));
+				vec.set(mp.getMarkIndex().get(init), ASTValue.getAST(1.0));
 			}
 			initvecSet.put(genv, vec);
 		}
@@ -310,7 +292,7 @@ public class MarkingMatrix {
 			for (String label : net.getRewardSet()) {
 				for (Mark m : mp.getMarkSet().get(genv)) {
 					AST f = (AST) env.get(label);
-					vec.set(markIndex.get(m), ASTValue.getAST(analysis.astEval(f, m, env)));
+					vec.set(mp.getMarkIndex().get(m), ASTValue.getAST(analysis.astEval(f, m, env)));
 				}
 				GStringTuple tuple = new GStringTuple(label, genv);
 				this.rewardvecSet.put(tuple, vec);

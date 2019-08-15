@@ -553,6 +553,7 @@ public class FactoryPN {
 //		}
 
         // create nodes and AST
+        // priority: place, trans, reward
         for(String label : keys) {
         	Object obj = env.get(label);
         	if (obj instanceof Node) {
@@ -565,6 +566,17 @@ public class FactoryPN {
             		env.put(node.getLabel(), node); // replace definition by an instance
         			break;
         		}
+        		default:
+        		}
+        	}
+		}
+        
+        for(String label : keys) {
+        	Object obj = env.get(label);
+        	if (obj instanceof Node) {
+        		Node defnode = (Node) obj;
+        		String type = defnode.getType();
+        		switch (type) {
         		case "imm": {
             		ImmTrans node = createImmTrans(env, defnode);
             		immtrans.add(node);
@@ -583,6 +595,17 @@ public class FactoryPN {
             		env.put(node.getLabel(), node); // replace definition by an instance
         			break;
         		}
+        		default:
+        		}
+        	}
+		}
+
+        for(String label : keys) {
+        	Object obj = env.get(label);
+        	if (obj instanceof Node) {
+        		Node defnode = (Node) obj;
+        		String type = defnode.getType();
+        		switch (type) {
         		case "reward": {
             		Reward rwd = createReward(env, defnode);
             		rewards.add(rwd.label);
@@ -593,7 +616,7 @@ public class FactoryPN {
         		}
         	}
 		}
-        
+
         // create arcs
         for(String label : keys) {
         	Object obj = env.get(label);
