@@ -26,10 +26,12 @@ public class MarkingGraph {
 		mg.makingGroupGraph();
 		Collections.sort(mg.allgenvec);
 		Collections.sort(mg.allmark);
+		// count size for each group
 		for (Map.Entry<GenVec,List<Mark>> entry : mg.markSet.entrySet()) {
 			mg.genvecSize.put(entry.getKey(), entry.getValue().size());
 			Collections.sort(entry.getValue());
 		}
+		mg.countNNZ();
 		mg.createGenVecLabel();
 		mg.createGenTransLabel(net);
 		mg.createIndexForMarks();
@@ -39,6 +41,7 @@ public class MarkingGraph {
 	private Mark imark;
 	private final Map<Mark,GenVec> markToGenvec;
 	private final Map<GenVec,Integer> genvecSize;
+	private final Map<GenVec,Integer> genvecNnzSize;
 	private final Map<GenVec,List<Mark>> markSet;
 	private final List<GenVec> allgenvec;
 	private final List<Mark> allmark;
@@ -50,6 +53,7 @@ public class MarkingGraph {
 	private MarkingGraph() {
 		markToGenvec = new HashMap<Mark,GenVec>();
 		genvecSize = new HashMap<GenVec,Integer>();
+		genvecNnzSize = new HashMap<GenVec,Integer>();
 		markSet = new HashMap<GenVec,List<Mark>>();
 		allgenvec = new ArrayList<GenVec>();
 		allmark = new ArrayList<Mark>();
@@ -57,35 +61,23 @@ public class MarkingGraph {
 		genvecLabel = new HashMap<GenVec,String>();
 		genTransLabel = new HashMap<GenTrans,String>();
 	}
-
-	public final int immSize() {
+	
+	private final int getTotal(GenVec.Type type, Map<GenVec,Integer> map) {
 		int total = 0;
-		for (Map.Entry<GenVec,Integer> entry : genvecSize.entrySet()) {
-			if (entry.getKey().getType() == GenVec.Type.IMM) {
+		for (Map.Entry<GenVec,Integer> entry : map.entrySet()) {
+			if (entry.getKey().getType() == type) {
 				total += entry.getValue();
 			}
 		}
-		return total;
+		return total;		
+	}
+
+	public final int getTotalState(GenVec.Type type) {
+		return getTotal(type, genvecSize);
 	}
 	
-	public final int genSize() {
-		int total = 0;
-		for (Map.Entry<GenVec,Integer> entry : genvecSize.entrySet()) {
-			if (entry.getKey().getType() == GenVec.Type.GEN) {
-				total += entry.getValue();
-			}
-		}
-		return total;
-	}
-
-	public final int absSize() {
-		int total = 0;
-		for (Map.Entry<GenVec,Integer> entry : genvecSize.entrySet()) {
-			if (entry.getKey().getType() == GenVec.Type.ABS) {
-				total += entry.getValue();
-			}
-		}
-		return total;
+	public final int getTotalNNZ(GenVec.Type type) {
+		return getTotal(type, genvecNnzSize);
 	}
 
 	public final Mark getInitialMark() {
@@ -150,6 +142,9 @@ public class MarkingGraph {
 		allmark.add(m);
 	}
 	
+	/**
+	 * Make connections between GenVec groups
+	 */
 	private void makingGroupGraph() {
 		class GenVecTuple {
 			final GenVec src;
@@ -192,6 +187,19 @@ public class MarkingGraph {
 					created.add(tuple);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Count NNZ transitions
+	 */
+	private void countNNZ() {
+		for (Map.Entry<GenVec,List<Mark>> entry : markSet.entrySet()) {
+			int c = 0;
+			for (Mark m : entry.getValue()) {
+				c += m.getOutArc().size();
+			}
+			genvecNnzSize.put(entry.getKey(),c);
 		}
 	}
 

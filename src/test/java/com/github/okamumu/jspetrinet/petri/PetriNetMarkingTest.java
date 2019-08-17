@@ -13,6 +13,7 @@ import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.JSPNException;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
+import com.github.okamumu.jspetrinet.marking.GenVec;
 import com.github.okamumu.jspetrinet.marking.Mark;
 import com.github.okamumu.jspetrinet.marking.MarkingGraph;
 import com.github.okamumu.jspetrinet.marking.method.DFS;
@@ -73,9 +74,9 @@ public class PetriNetMarkingTest {
 			MarkWriter.writeMark(net, mg);
 			MarkWriter.writeMarkGroup(net, mg);
 			bw.flush();
-			System.out.println(mg.immSize());
-			System.out.println(mg.genSize());
-			System.out.println(mg.absSize());
+			System.out.println(mg.getTotalState(GenVec.Type.IMM));
+			System.out.println(mg.getTotalState(GenVec.Type.GEN));
+			System.out.println(mg.getTotalState(GenVec.Type.ABS));
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -93,9 +94,9 @@ public class PetriNetMarkingTest {
 			MarkWriter.writeMark(net, mg);
 			MarkWriter.writeMarkGroup(net, mg);
 			bw.flush();
-			System.out.println(mg.immSize());
-			System.out.println(mg.genSize());
-			System.out.println(mg.absSize());
+			System.out.println(mg.getTotalState(GenVec.Type.IMM));
+			System.out.println(mg.getTotalState(GenVec.Type.GEN));
+			System.out.println(mg.getTotalState(GenVec.Type.ABS));
 			
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 		} catch (JSPNException e) {
