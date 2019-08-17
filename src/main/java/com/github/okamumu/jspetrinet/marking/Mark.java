@@ -1,5 +1,6 @@
 package com.github.okamumu.jspetrinet.marking;
 
+import com.github.okamumu.jspetrinet.graph.Node;
 import com.github.okamumu.jspetrinet.petri.nodes.Trans;
 
 /**
@@ -36,6 +37,8 @@ public final class Mark extends StateVector {
 		}
 	}
 
+//	private final StateVector vec;
+
 	/**
 	 * Constructor
 	 * @param vec An object of array of int (state vector)
@@ -43,4 +46,17 @@ public final class Mark extends StateVector {
 	public Mark(int[] vec) {
 		super(vec);
 	}
+	
+//	public int get(int i) {
+//		return vec.get(i);
+//	}
+//
+//	public int[] copy() {
+//		return vec.copy();
+//	}
+//
+//	@Override
+//	public int compareTo(Mark o) {
+//		return vec.compareTo(o.vec);
+//	}
 }

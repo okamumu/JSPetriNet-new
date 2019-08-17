@@ -3,6 +3,7 @@ package com.github.okamumu.jspetrinet.marking;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,7 +25,17 @@ public class MarkingGraph {
 		MarkingGraph mg = new MarkingGraph();
 		method.create(mg, init0, net, env);
 		mg.makingGroupGraph();
-		Collections.sort(mg.allgenvec);
+		Collections.sort(mg.allgenvec, new Comparator<GenVec>() {
+			@Override
+			public int compare(GenVec g1, GenVec g2) {
+				int ret = g1.compareTo(g2);
+				if (ret == 0) {
+					return g1.getType().compareTo(g2.getType());
+				} else {
+					return ret;
+				}
+			}
+		});
 		Collections.sort(mg.allmark);
 		// count size for each group
 		for (Map.Entry<GenVec,List<Mark>> entry : mg.markSet.entrySet()) {
@@ -76,10 +87,18 @@ public class MarkingGraph {
 		return getTotal(type, genvecSize);
 	}
 	
+	public final Integer getGenVecSize(GenVec g) {
+		return genvecSize.get(g);
+	}
+	
 	public final int getTotalNNZ(GenVec.Type type) {
 		return getTotal(type, genvecNnzSize);
 	}
 
+	public final Integer getGenVecNNZ(GenVec g) {
+		return genvecNnzSize.get(g);
+	}
+	
 	public final Mark getInitialMark() {
 		return imark;
 	}
@@ -100,10 +119,6 @@ public class MarkingGraph {
 		return allmark;
 	}
 
-	public final Integer getGenVecSize(GenVec g) {
-		return genvecSize.get(g);
-	}
-	
 	public final Map<GenVec,List<Mark>> getMarkSet() {
 		return markSet;
 	}

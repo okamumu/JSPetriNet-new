@@ -2,6 +2,7 @@ package com.github.okamumu.jspetrinet.marking;
 
 import java.util.Objects;
 
+import com.github.okamumu.jspetrinet.graph.Node;
 import com.github.okamumu.jspetrinet.petri.Net;
 import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 
@@ -36,6 +37,7 @@ public class GenVec extends StateVector {
 	}
 	
 	private final Type type;
+//	private final StateVector vec;
 
 	/**
 	 * Constructor
@@ -54,6 +56,14 @@ public class GenVec extends StateVector {
 	public Type getType() {
 		return type;
 	}
+
+//	public final int get(int i) {
+//		return vec.get(i);
+//	}
+//
+//	public int[] copy() {
+//		return vec.copy();
+//	}
 
 	/**
 	 * A method to get a string
@@ -85,7 +95,8 @@ public class GenVec extends StateVector {
 		if (result.equals("(")) {
 			result += "EXP";
 		}
-		return result + ")";
+		result += ")" + type.toString();		
+		return result;
 	}
 	
 	public boolean isSameClass(GenVec other) {
@@ -118,4 +129,13 @@ public class GenVec extends StateVector {
 		return type == other.type;
 	}
 
+//	@Override
+//	public int compareTo(GenVec other) {
+//		int retval = type.compareTo(other.type);
+//		if (retval == 0) {
+//			return vec.compareTo(other.vec);
+//		} else {
+//			return retval;
+//		}
+//	}
 }
