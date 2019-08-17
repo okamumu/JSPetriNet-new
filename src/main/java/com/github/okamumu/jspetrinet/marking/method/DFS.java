@@ -32,10 +32,6 @@ import com.github.okamumu.jspetrinet.petri.nodes.Trans;
  */
 public class DFS implements CreateMarking {
 	
-	private int imm;
-	private int gen;
-	private int abs;
-
 	private MarkingGraph markGraph;
 
 	private final Map<Mark,Mark> createdMarks;
@@ -60,10 +56,8 @@ public class DFS implements CreateMarking {
 	
 	@Override
 	public void create(MarkingGraph mg, Mark init, Net net, ASTEnv env) throws JSPNException {
-		imm = 0;
-		gen = 0;
-		abs = 0;
 		markGraph = mg;
+		mg.setInitialMark(init);
 		createdMarks.put(init, init);
 		novisited.push(init);
 		createMarking(net, env);
@@ -133,11 +127,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
-			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
-		}
-		imm++;
+		logger.debug("Add {} as Imm {}", m, genv);
 	}
 
 	/**
@@ -153,11 +143,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
-			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
-		}
-		gen++;
+		logger.debug("Add {} as Gen {}", m, genv);
 	}
 
 	/**
@@ -173,11 +159,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		if (logger.isTraceEnabled()) {
-			logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
-			logger.trace("IMM {}, GEN {}, ABS {}", imm, gen, abs);
-		}
-		abs++;
+		logger.debug("Add {} as Abs {}", m, genv);
 	}
 
 	/**
@@ -272,8 +254,7 @@ public class DFS implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			if (logger.isTraceEnabled())
-				logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
+			logger.debug("New visit {} (GenVec {})", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {

@@ -163,4 +163,8 @@ abstract public class Trans extends Node implements Comparable<Trans> {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return label;
+	}	
 }

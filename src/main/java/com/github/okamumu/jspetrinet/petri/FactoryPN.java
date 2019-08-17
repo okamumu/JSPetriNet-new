@@ -219,7 +219,7 @@ public class FactoryPN {
 		Place elem = new Place(label, placeid, max);
 		initMark.add(init);
 		placeid++;
-		logger.trace("{} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getMax());
+		logger.debug("{} {} {} {}", elem, elem.getLabel(), elem.getIndex(), elem.getMax());
 		return elem;
 	}
 
@@ -268,8 +268,7 @@ public class FactoryPN {
 		}
 		ImmTrans elem = new ImmTrans(label, immtransid, weight, guard, update, priority, vanishable);
 		immtransid++;
-		if (logger.isTraceEnabled())
-			logger.trace("{} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getWeight().toString(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
+		logger.debug("{} {} {} {} {} {} {} {}", elem, elem.getLabel(), elem.getIndex(), elem.getWeight(), elem.getGuard(), elem.getUpdate(), elem.getPriority(), elem.canVanishing());
 		return elem;
 	}
 
@@ -317,8 +316,7 @@ public class FactoryPN {
 		}
 		ExpTrans elem = new ExpTrans(label, exptransid, rate, guard, update, priority, vanishable);
 		exptransid++;
-		if (logger.isTraceEnabled())
-			logger.trace("{} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getRate().toString(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
+		logger.debug("{} {} {} {} {} {} {} {}", elem, elem.getLabel(), elem.getIndex(), elem.getRate(), elem.getGuard(), elem.getUpdate(), elem.getPriority(), elem.canVanishing());
 		return elem;
 	}
 
@@ -384,8 +382,7 @@ public class FactoryPN {
 		}
 		GenTrans elem = new GenTrans(label, gentransid, dist, pol, guard, update, priority, vanishable);
 		gentransid++;
-		if (logger.isTraceEnabled())
-			logger.trace("{} {} {} {} {} {} {} {} {}", elem.toString(), elem.getLabel(), elem.getIndex(), elem.getDist().toString(), elem.getPolicy(), elem.getGuard().toString(), elem.getUpdate().toString(), elem.getPriority(), elem.canVanishing());
+		logger.debug("{} {} {} {} {} {} {} {} {}", elem, elem.getLabel(), elem.getIndex(), elem.getDist(), elem.getPolicy(), elem.getGuard(), elem.getUpdate(), elem.getPriority(), elem.canVanishing());
 		return elem;
 	}
 
@@ -428,17 +425,14 @@ public class FactoryPN {
 			Place place = (Place) sobj;
 			Trans trans = (Trans) dobj;			
 			elem = new InArc(place, trans, multi);
-			if (logger.isTraceEnabled())
-				logger.trace("iarc {} -> {} ({})", place.getLabel(), trans.getLabel(), multi.toString());
+			logger.debug("iarc {} -> {} ({})", place.getLabel(), trans.getLabel(), multi);
 		} else if (sobj instanceof Trans && dobj instanceof Place) {
 			Trans trans = (Trans) sobj;
 			Place place = (Place) dobj;
 			elem = new OutArc(trans, place, multi);
-			if (logger.isTraceEnabled())
-				logger.trace("oarc {} -> {} ({})", trans.getLabel(), place.getLabel(), multi.toString());
+			logger.debug("oarc {} -> {} ({})", trans.getLabel(), place.getLabel(), multi);
 		} else {
-			if (logger.isErrorEnabled())
-				logger.error("source {}, dest {}", sobj.toString(), dobj.toString());
+			logger.error("source {}, dest {}", sobj, dobj);
 			throw new InvalidDefinition("The arc should connect between place and trans.");
 		}
 		return elem;
@@ -477,8 +471,7 @@ public class FactoryPN {
 		Place place = (Place) env.get(src);
 		Trans trans = (Trans) env.get(dest);
 		InhibitArc elem = new InhibitArc(place, trans, multi);
-		if (logger.isTraceEnabled())
-			logger.trace("harc {} -> {} ({})", place.getLabel(), trans.getLabel(), multi.toString());
+		logger.debug("harc {} -> {} ({})", place.getLabel(), trans.getLabel(), multi);
 		return elem;
 	}
 
@@ -523,8 +516,7 @@ public class FactoryPN {
 			}
 		}		
 		Reward rwd = new Reward(label, ASTValue.getAST(f.eval(env)));
-		if (logger.isTraceEnabled())
-			logger.trace("reward {} ({})", label, f.toString());
+		logger.debug("reward {} ({})", label, f);
 		rewardid++;
 		return rwd;
 	}

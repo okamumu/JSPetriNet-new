@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -26,6 +27,7 @@ import com.github.okamumu.jspetrinet.ast.values.ASTNull;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.ast.values.ASTVariable;
 import com.github.okamumu.jspetrinet.exception.ASTException;
+import com.github.okamumu.jspetrinet.exception.GrammarError;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
 import com.github.okamumu.jspetrinet.parser.JSPetriNetParser;
@@ -34,6 +36,13 @@ import com.github.okamumu.jspetrinet.petri.ast.ASTEnableCond;
 import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
 public class NetBuilder {
+
+	static public Net buildFromFile(ASTEnv env) throws InvalidDefinition, ASTException, IOException {
+		InputStream is = System.in;
+		NetBuilder builder = new NetBuilder(env);
+		builder.parseProg(is);
+    	return FactoryPN.getInstance().compilePN(env);
+	}
 
 	static public Net buildFromFile(String file, ASTEnv env) throws InvalidDefinition, ASTException, IOException {
 		InputStream is = Files.newInputStream(Paths.get(file));
@@ -48,7 +57,7 @@ public class NetBuilder {
 		return FactoryPN.getInstance().compilePN(env);
 	}
 
-	static public AST buildExpression(String in) {
+	static public AST buildExpression(String in) throws GrammarError {
 		Env env = new Env();
 		NetBuilder builder = new NetBuilder(env);
 		return builder.parseExpression(in);
@@ -56,6 +65,7 @@ public class NetBuilder {
 
 	private final Logger logger;
 	private final LinkedList<AST> stack;
+	private final LinkedList<String> errors;
 	private final ASTEnv env;
 	private final FactoryPN factory;
 	private final LinkedList<FactoryPN.Node> node;
@@ -67,44 +77,54 @@ public class NetBuilder {
     	factory.reset();
     	stack = new LinkedList<AST>();
     	node = new LinkedList<FactoryPN.Node>();
+    	errors = new LinkedList<String>();
 	}
 	
-	private void parseProg(InputStream in) throws IOException {
+	private void parseProg(InputStream in) throws IOException, GrammarError {
 		JSPetriNetParser parser = new JSPetriNetParser(this, in);
-		parser.parseProg();		
+		parser.parseProg();
+		if (errors.size() != 0) {
+			throw new GrammarError("Error in SPN");
+		}
 	}
 	
-	private void parseProg(String in) {
+	private void parseProg(String in) throws ASTException {
 		JSPetriNetParser parser = new JSPetriNetParser(this, in);
-		parser.parseProg();		
+		parser.parseProg();
+		if (errors.size() != 0) {
+			throw new GrammarError("Error in SPN");
+		}
 	}
 
-	private AST parseExpression(String in) {
+	private AST parseExpression(String in) throws GrammarError {
 		JSPetriNetParser parser = new JSPetriNetParser(this, in);
 		parser.parseExpression();
-		return stack.pop();
-		
+		if (errors.size() != 0) {
+			throw new GrammarError("Error in SPN");
+		}
+		return stack.pop();		
+	}
+	
+	public List<String> getErrors() {
+		return errors;
 	}
 
 	public void setNodeOption() {
 		AST right = stack.pop();
 		String label = "arg" + node.size();
 		node.peek().put(label, right);
-		if (logger.isTraceEnabled())
-			logger.trace("Set option {}: {}", label, right);
+		logger.debug("Set option {}: {}", label, right);
 	}
 	
 	public void setNodeOption(String label) {
 		AST right = stack.pop();
 		node.peek().put(label, right);
-		if (logger.isTraceEnabled())
-			logger.trace("Set option {}: {}", label, right);
+		logger.debug("Set option {}: {}", label, right);
 	}
 	
 	public void createNewNode() {
 		node.push(factory.new Node());
-		if (logger.isTraceEnabled())
-			logger.trace("Create a new option node");
+		logger.debug("Create a new option node");
 	}
 
 	public void buildNode(String type, String label) {
@@ -112,31 +132,26 @@ public class NetBuilder {
 		case "place":
 			node.peek().setType("place");
 			node.peek().put("label", label);
-			if (logger.isTraceEnabled())
-				logger.trace("Create a place {}: label", label);
+			logger.debug("Create a place {}", label);
 			break;
 		case "imm":
 			node.peek().setType("imm");
 			node.peek().put("label", label);
-			if (logger.isTraceEnabled())
-				logger.trace("Create an imm {}: label", label);
+			logger.debug("Create an imm {}", label);
 			break;
 		case "exp":
 			node.peek().setType("exp");
 			node.peek().put("label", label);
-			if (logger.isTraceEnabled())
-				logger.trace("Create an exp {}: label", label);
+			logger.debug("Create an exp {}", label);
 			break;
 		case "gen":
 			node.peek().setType("gen");
 			node.peek().put("label", label);
-			if (logger.isTraceEnabled())
-				logger.trace("Create a gen {}: label", label);
+			logger.debug("Create a gen {}", label);
 			break;
 		case "trans":
 			node.peek().put("label", label);
-			if (logger.isTraceEnabled())
-				logger.trace("Create a trans {}", label);
+			logger.debug("Create a trans {}", label);
 			break;
 		default:
 		}
@@ -151,15 +166,13 @@ public class NetBuilder {
 			node.peek().setType("arc");
 			node.peek().put("src", src);
 			node.peek().put("dest", dest);
-			if (logger.isTraceEnabled())
-				logger.trace("Create arc {} to {}", src, dest);
+			logger.debug("Create arc {} to {}", src, dest);
 			break;
 		case "harc":
 			node.peek().setType("harc");
 			node.peek().put("src", src);
 			node.peek().put("dest", dest);
-			if (logger.isTraceEnabled())
-				logger.trace("Create harc {} to {}", src, dest);
+			logger.debug("Create harc {} to {}", src, dest);
 			break;
 		default:
 		}
@@ -172,8 +185,7 @@ public class NetBuilder {
 		AST f = stack.pop();
 		node.peek().put("formula", f);		
 		env.put(label, node.pop());
-		if (logger.isTraceEnabled())
-			logger.trace("Create reward {}: {}", label, f);
+		logger.debug("Create reward {}: {}", label, f);
 	}
 
 	
@@ -181,8 +193,7 @@ public class NetBuilder {
 
 	public void setUpdateBlockEnd() {
 		stack.push(new BlockEnd());
-		if (logger.isTraceEnabled())
-			logger.trace("Set an update block end");
+		logger.debug("Set an update block end");
 	}
 	
 	public void buildUpdateBlock() {
@@ -193,23 +204,20 @@ public class NetBuilder {
 			a = stack.pop();
 		}
 		node.peek().put("update", list);
-		if (logger.isTraceEnabled())
-			logger.trace("Put an update block");
+		logger.debug("Put an update block");
 	}
 
 	public void buildAssignExpression(String label) {
 		AST right = stack.pop();
 		env.put(label, right);
-		if (logger.isTraceEnabled())
-			logger.trace("Put an assign expression {} = {}", label, right);
+		logger.debug("Put an assign expression {} = {}", label, right);
 	}
 
 	public void buildAssignNTokenExpression() {
 		AST right = stack.pop();
 		ASTNToken ntoken = (ASTNToken) stack.pop();
 		stack.push(new ASTAssignNToken(ntoken.getLabel(), right));
-		if (logger.isTraceEnabled())
-			logger.trace("Build an assing ntoken #{} = {}", ntoken.getLabel(), right);
+		logger.debug("Build an assing ntoken #{} = {}", ntoken.getLabel(), right);
 	}
 
 	public void buildValueExpression(String label) {
@@ -218,8 +226,7 @@ public class NetBuilder {
 			stack.push(ASTValue.getAST(tmp));
 		} catch (ObjectNotFoundInASTEnv e) {
 			stack.push(new ASTVariable(label));
-			if (logger.isTraceEnabled())
-				logger.trace("The value {} is not found in environment", label);
+			logger.debug("The value {} is not found in environment", label);
 		}
 	}
 
@@ -331,8 +338,7 @@ public class NetBuilder {
 //			break;
 		default:
 			retval = ASTValue.getAST(null);
-			if (logger.isErrorEnabled())
-				logger.error("Function: {} is not defined", func);
+			logger.error("Function: {} is not defined", func);
 		}
 		stack.push(retval);
 	}
@@ -348,8 +354,7 @@ public class NetBuilder {
 			default:
 			}
 		}
-		if (logger.isTraceEnabled())
-			logger.trace("Build a const dist");
+		logger.debug("Build a const dist");
 		return new ConstDist(value);
 	}
 
@@ -369,8 +374,7 @@ public class NetBuilder {
 			default:
 			}
 		}
-		if (logger.isTraceEnabled())
-			logger.trace("Build a unif dist");
+		logger.debug("Build a unif dist");
 		return new UnifDist(min, max);
 	}
 
@@ -385,8 +389,7 @@ public class NetBuilder {
 			default:
 			}
 		}
-		if (logger.isTraceEnabled())
-			logger.trace("Build an exp dist");
+		logger.debug("Build an exp dist");
 		return new ExpDist(rate);
 	}
 
@@ -395,8 +398,7 @@ public class NetBuilder {
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
 		}
-		if (logger.isTraceEnabled())
-			logger.trace("Build a min func");
+		logger.debug("Build a min func");
 		return new ASTMathFunc(args, "min");
 	}
 
@@ -405,8 +407,7 @@ public class NetBuilder {
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
 		}
-		if (logger.isTraceEnabled())
-			logger.trace("Build a max func");
+		logger.debug("Build a max func");
 		return new ASTMathFunc(args, "max");
 	}
 
@@ -429,8 +430,7 @@ public class NetBuilder {
 		ASTList args = new ASTList();
 		args.add(x);
 		args.add(n);
-		if (logger.isTraceEnabled())
-			logger.trace("Build a pow func");
+		logger.debug("Build a pow func");
 		return new ASTMathFunc(args, "pow");
 	}
 
@@ -447,8 +447,7 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		if (logger.isTraceEnabled())
-			logger.trace("Build a sqrt func");
+		logger.debug("Build a sqrt func");
 		return new ASTMathFunc(args, "sqrt");
 	}
 
@@ -465,8 +464,7 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		if (logger.isTraceEnabled())
-			logger.trace("Build an exp func");
+		logger.debug("Build an exp func");
 		return new ASTMathFunc(args, "exp");
 	}
 
@@ -483,8 +481,12 @@ public class NetBuilder {
 		}
 		ASTList args = new ASTList();
 		args.add(x);
-		if (logger.isTraceEnabled())
-			logger.trace("Build a log func");
+		logger.debug("Build a log func");
 		return new ASTMathFunc(args, "log");
+	}
+
+	public void addError(String msg) {
+		logger.error(msg);
+		errors.add(msg);
 	}
 }

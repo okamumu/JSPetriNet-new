@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.github.okamumu.jspetrinet.ast.AST;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.exception.ASTException;
+import com.github.okamumu.jspetrinet.exception.GrammarError;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.JSPNException;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
@@ -162,5 +163,29 @@ public class PetriNetCompileTest3 {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+    @Test (expected = GrammarError.class)
+	public void test05() throws IOException, JSPNException {
+    	str = new StringBuilder();
+    	str.append("place P1 (init 1)\n");
+    	str.append("place P2\n");
+    	str.append("place P3 (init=1)\n");
+    	str.append("place P4\n");
+    	str.append("exp T1 6\n");
+    	str.append("exp T2\n");
+    	str.append("exp T3\n");
+    	str.append("arc P1 to T1\n");
+    	str.append("arc T1 to P2\n");
+    	str.append("arc P3 to T2\n");
+    	str.append("arc T2 to P4\n");
+    	str.append("harc P3 to T1\n");
+    	Env env = new Env();
+    	Net net = NetBuilder.buildFromString(str.toString(), env);
+    	PNWriter.write(net, env);
+		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
+		MarkWriter.writeMark(net, mg);
+		MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+		MatlabMatrixWriter.write("test2.mat", env, mat);
 	}
 }

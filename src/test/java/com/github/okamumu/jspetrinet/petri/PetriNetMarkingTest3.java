@@ -137,8 +137,8 @@ public class PetriNetMarkingTest3 {
 				System.out.println(entry.getKey().getString(net));
 				for (Mark m : entry.getValue()) {
 //					System.out.print(mat.getMarkIndex().get(m) + " : ");
-					System.out.println(m.getString(net));
-				}				
+//					System.out.println(m.getString(net));
+				}
 			}
 			for (Map.Entry<GTuple,ASTMatrix> m : mat.getMatrixSet().entrySet()) {
 				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc()));

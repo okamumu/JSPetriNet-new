@@ -77,7 +77,13 @@ public class PetriNetTestFromFile {
 
 	public void example(String file, Net net, ASTEnv env) {
 		try {
+			long start = System.nanoTime();
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
+			System.out.println("done");
+			System.out.println("computation time    : " + (System.nanoTime() - start) / 1000000000.0 + " (sec)");
+			System.out.println("Total IMM size " + mg.immSize());
+			System.out.println("Total GEN size " + mg.genSize());
+			System.out.println("Total ABS size " + mg.absSize());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MarkWriter.writeMark(file + "_mark.dot", net, mg);
 			MarkWriter.writeMarkGroup(file + "_gmark.dot", net, mg);
@@ -102,7 +108,13 @@ public class PetriNetTestFromFile {
 
 	public void exampleTangible(String file, Net net, ASTEnv env) {
 		try {
+			long start = System.nanoTime();
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
+			System.out.println("done");
+			System.out.println("computation time    : " + (System.nanoTime() - start) / 1000000000.0 + " (sec)");
+			System.out.println("Total IMM size " + mg.immSize());
+			System.out.println("Total GEN size " + mg.genSize());
+			System.out.println("Total ABS size " + mg.absSize());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MarkWriter.writeMark(file + "tan_mark.dot", net, mg);
 			MarkWriter.writeMarkGroup(file + "tan_gmark.dot", net, mg);
@@ -176,11 +188,31 @@ public class PetriNetTestFromFile {
 	}
 
 	@Test
+	@Ignore
 	public void test06() {
     	String file = "example/spnp_example6";
     	Env env = new Env();
     	Net net = this.exampleMake(file, env);
-//    	this.example(file, net, env);
+    	this.example(file, net, env);
+    	this.exampleTangible(file, net, env);
+	}
+
+	@Test
+	@Ignore
+	public void test09() {
+    	String file = "example/spnp_example9";
+    	Env env = new Env();
+    	Net net = this.exampleMake(file, env);
+    	this.example(file, net, env);
+    	this.exampleTangible(file, net, env);
+	}
+
+	@Test
+	public void test10() {
+    	String file = "example/spnp_example10";
+    	Env env = new Env();
+    	Net net = this.exampleMake(file, env);
+    	this.example(file, net, env);
     	this.exampleTangible(file, net, env);
 	}
 }

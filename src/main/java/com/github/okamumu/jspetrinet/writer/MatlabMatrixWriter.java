@@ -63,46 +63,46 @@ public class MatlabMatrixWriter {
 					+ mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getDest())
 					+ mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans());
 			ASTMatrix am = m.getValue();
-			matfile.addDataElement(MATLABDataElement.doubleSparseMatrix(label,
-					new int[] {am.getISize(), am.getJSize()},
-					am.getNNZ(), am.getI(), am.getJ(), am.getValue(env)));
-			if (logger.isTraceEnabled()) {
-				logger.trace("Add matrix {} ({},{})", label, am.getISize(), am.getJSize());
-				logger.trace(" {} {}", Arrays.toString(am.getI()), Arrays.toString(am.getJ()));
-				logger.trace(" {}", Arrays.toString(am.getValue(env)));
-			}
+			int isize = am.getISize();
+			int jsize = am.getJSize();
+			int nnz = am.getNNZ();
+			int[] i = am.getI();
+			int[] j = am.getJ();
+			double[] value = am.getValue(env);
+			matfile.addDataElement(MATLABDataElement.doubleSparseMatrix(label, new int[] {isize, jsize}, nnz, i, j, value));
+			logger.debug("Add matrix {} ({},{}) nnz {}", label, isize, jsize, nnz);
+			logger.debug(" i={}", i);
+			logger.debug(" j={}", j);
+			logger.debug(" value={}", value);
 		}
 		for (Map.Entry<GTuple,ASTVector> v : mat.getSumVectorSet().entrySet()) {
 			String label = "sum" + mat.getMarkingGraph().getGenVecLabel().get(v.getKey().getSrc())
 					+ mat.getMarkingGraph().getGenTransLabel().get(v.getKey().getGenTrans());
 			ASTVector av = v.getValue();
-			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
-					new int[] {1,av.getSize()}, av.getValue(env)));			
-			if (logger.isTraceEnabled()) {
-				logger.trace("Add sum {} ({})", label, av.getSize());
-				logger.trace(" {}", Arrays.toString(av.getValue(env)));
-			}
+			int size = av.getSize();
+			double[] value = av.getValue(env);
+			matfile.addDataElement(MATLABDataElement.doubleMatrix(label, new int[] {1,size}, value));
+			logger.debug("Add sum {} ({})", label, size);
+			logger.debug(" value={}", value);
 		}
 		for (Map.Entry<GenVec,ASTVector> v : mat.getInitVectorSet().entrySet()) {
 			String label = "init" + mat.getMarkingGraph().getGenVecLabel().get(v.getKey());
 			ASTVector av = v.getValue();
-			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
-					new int[] {1,av.getSize()}, av.getValue(env)));
-			if (logger.isTraceEnabled()) {
-				logger.trace("Add init {} ({})", label, av.getSize());
-				logger.trace(" {}", Arrays.toString(av.getValue(env)));
-			}
+			int size = av.getSize();
+			double[] value = av.getValue(env);
+			matfile.addDataElement(MATLABDataElement.doubleMatrix(label, new int[] {1,size}, value));
+			logger.debug("Add init {} ({})", label, size);
+			logger.debug(" value={}", value);
 		}
 		for (Map.Entry<GStringTuple,ASTVector> v : mat.getRewardVectorSet().entrySet()) {
 			String label = v.getKey().getGenString()
 					+ mat.getMarkingGraph().getGenVecLabel().get(v.getKey().getGenVec());
 			ASTVector av = v.getValue();
-			matfile.addDataElement(MATLABDataElement.doubleMatrix(label,
-					new int[] {1,av.getSize()}, av.getValue(env)));
-			if (logger.isTraceEnabled()) {
-				logger.trace("Add reward {} ({})", label, av.getSize());
-				logger.trace(" {}", Arrays.toString(av.getValue(env)));
-			}
+			int size = av.getSize();
+			double[] value = av.getValue(env);
+			matfile.addDataElement(MATLABDataElement.doubleMatrix(label, new int[] {1,size}, value));
+			logger.debug("Add reward {} ({})", label, size);
+			logger.debug(" value={}", value);
 		}
 		return matfile;
 	}

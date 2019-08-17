@@ -44,11 +44,11 @@ public class StateWriter {
 		for (GenVec g : mp.getGenVec()) {
 			String s = mat.getMarkingGraph().getGenVecLabel().get(g) + " " + makeLabel(net, g);
 			bw.println(s);
-			if (logger.isTraceEnabled()) logger.trace(s);
+			logger.debug(s);
 			for (Mark m : mp.getMarkSet().get(g)) {
 				String str = "" + mat.getMarkingGraph().getMarkIndex().get(m) + " " + makeLabel(net, m);
 				bw.println(str);
-				if (logger.isTraceEnabled()) logger.trace(str);
+				logger.debug(str);
 			}
 		}
 	}

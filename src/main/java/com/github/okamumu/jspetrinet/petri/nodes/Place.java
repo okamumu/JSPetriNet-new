@@ -52,4 +52,9 @@ public final class Place extends Node {
 	public final int getMax() {
 		return max;
 	}
+	
+	@Override
+	public String toString() {
+		return label + index;
+	}
 }

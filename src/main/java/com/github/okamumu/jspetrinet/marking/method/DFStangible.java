@@ -28,6 +28,10 @@ import com.github.okamumu.jspetrinet.petri.nodes.Trans;
 
 public class DFStangible implements CreateMarking {
 	
+	/**
+	 * A class to connect two marks temporally
+	 *
+	 */
 	class Arc {
 		Mark src;
 		Mark dest;
@@ -40,10 +44,12 @@ public class DFStangible implements CreateMarking {
 		}
 	}
 
+	/**
+	 * An instance to represent the end of searching children
+	 */
 	private static final Mark endMark = new Mark(null);
 	
 	private MarkingGraph markGraph;
-	private Net net;
 
 	private final Map<Mark,Mark> createdMarks;
 	private final Map<GenVec,GenVec> genvecSet;
@@ -75,12 +81,11 @@ public class DFStangible implements CreateMarking {
 	
 	@Override
 	public void create(MarkingGraph mg, Mark init, Net net, ASTEnv env) throws JSPNException {
-		this.net = net;
 		markGraph = mg;
 		createdMarks.put(init, init);
 		novisited.push(init);
 		createMarking(net, env);
-		postProcessing();
+		postProcessing(init);
 	}
 	
 	/**
@@ -147,8 +152,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		if (logger.isTraceEnabled())
-			logger.trace("Add {} as Imm {}", m.toString(), genv.toString());
+		logger.debug("Add {} as Imm {}", m, genv);
 	}
 
 	/**
@@ -164,8 +168,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		if (logger.isTraceEnabled())
-			logger.trace("Add {} as Gen {}", m.toString(), genv.toString());
+		logger.debug("Add {} as Gen {}", m, genv);
 	}
 
 	/**
@@ -181,8 +184,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		if (logger.isTraceEnabled())
-			logger.trace("Add {} as Abs {}", m.toString(), genv.toString());
+		logger.debug("Add {} as Abs {}", m, genv);
 	}
 
 	/**
@@ -271,11 +273,17 @@ public class DFStangible implements CreateMarking {
 //		src.new Arc(src, dest, tr);
 		arcList.add(new Arc(src, dest, tr));
 	}
-	
-	private void margeExitSet(Mark m, Mark other) throws MarkingError {
-		ExitMark em = exitMarkSet.getOrDefault(m, ExitMark.init(m));
-		ExitMark eo = exitMarkSet.getOrDefault(other, ExitMark.init(other));
-		exitMarkSet.put(m, ExitMark.union(markToGenVec, em, eo));
+
+	/**
+	 * A method to merge two exit marks
+	 * @param parent An instance of parent
+	 * @param child An instance of child
+	 * @throws MarkingError An error for merging
+	 */
+	private void mergeExitSet(Mark parent, Mark child) throws MarkingError {
+		ExitMark em = exitMarkSet.getOrDefault(parent, ExitMark.init(parent));
+		ExitMark eo = exitMarkSet.getOrDefault(child, ExitMark.init(child));
+		exitMarkSet.put(parent, ExitMark.union(markToGenVec, em, eo));
 	}
 
 	private void vanishing(Net net, ASTEnv env) throws JSPNException {
@@ -291,7 +299,7 @@ public class DFStangible implements CreateMarking {
 				Mark e = markPath.pop();
 				Mark r = markPath.peek();
 				if (r != null) {
-					margeExitSet(r, e);
+					mergeExitSet(r, e);
 				}
 				visited.add(e);
 				continue;
@@ -303,14 +311,13 @@ public class DFStangible implements CreateMarking {
 			 */
 			if (visited.contains(m)) {
 				Mark r = markPath.peek();
-				margeExitSet(r, m);
+				mergeExitSet(r, m);
 				continue;
 			}
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			if (logger.isTraceEnabled())
-				logger.trace("New visit {} (GenVec {}) in vanishing", m.toString(), Arrays.toString(vec));
+			logger.debug("New visit {} (GenVec {}) in vanishing", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -323,7 +330,7 @@ public class DFStangible implements CreateMarking {
 					setGenVecToAbs(m, vec);
 				}
 				Mark r = markPath.peek();
-				margeExitSet(r, m);
+				mergeExitSet(r, m);
 			}
 		}
 	}
@@ -338,8 +345,7 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			if (logger.isTraceEnabled())
-				logger.trace("New visit {} (GenVec {})", m.toString(), Arrays.toString(vec));
+			logger.debug("New visit {} (GenVec {})", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -356,7 +362,7 @@ public class DFStangible implements CreateMarking {
 		}
 	}
 
-	private void postProcessing() {
+	private void postProcessing(Mark init) {
 		// post processing 1
 		for (Map.Entry<Mark,GenVec> entry : markToGenVec.entrySet()) {
 			if (!exitMarkSet.get(entry.getKey()).canVanishing()) {
@@ -374,6 +380,12 @@ public class DFStangible implements CreateMarking {
 					src.new Arc(src, dest, tr);				
 				}
 			}
+		}
+		// init
+		if (exitMarkSet.get(init).canVanishing()) {
+			markGraph.setInitialMark(exitMarkSet.get(init).get());
+		} else {
+			markGraph.setInitialMark(init);
 		}
 	}
 }

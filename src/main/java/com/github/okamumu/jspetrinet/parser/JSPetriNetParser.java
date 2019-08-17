@@ -3,10 +3,13 @@ package com.github.okamumu.jspetrinet.parser;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.antlr.v4.runtime.BaseErrorListener;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.RecognitionException;
+import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -32,6 +35,16 @@ public class JSPetriNetParser implements JSPNLListener {
 		is = CharStreams.fromString(text);
 		lexer = new JSPNLLexer(is);
 		parser = new JSPNLParser(new CommonTokenStream(lexer));
+		parser.addErrorListener(new BaseErrorListener() {
+			@Override
+			public void syntaxError(Recognizer<?,?> recognizer, Object offendingSymbol, int line,
+					int charPositionInLine, String msg, RecognitionException e) {
+				String err = String.format("Failed to parse at line %d position %d due to %s", line, charPositionInLine, msg);
+				astbuilder.addError(err);
+//				throw new IllegalStateException(String.format(
+//						"Failed to parse at line %d position %d due to %s", line, charPositionInLine, msg), e);				
+			}
+		});
 		parser.addParseListener(this);
 	}
 
@@ -451,6 +464,8 @@ public class JSPetriNetParser implements JSPNLListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void visitErrorNode(ErrorNode node) { }
+	@Override public void visitErrorNode(ErrorNode node) {
+//		astbuilder.addErrorNode(node);
+	}
 
 }

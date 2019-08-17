@@ -21,7 +21,7 @@ public class MarkingGraph {
 
 	public static MarkingGraph create(Mark init, Net net, ASTEnv env, CreateMarking method) throws JSPNException {
 		Mark init0 = new Mark(init.copy());
-		MarkingGraph mg = new MarkingGraph(init0);
+		MarkingGraph mg = new MarkingGraph();
 		method.create(mg, init0, net, env);
 		mg.makingGroupGraph();
 		Collections.sort(mg.allgenvec);
@@ -32,7 +32,7 @@ public class MarkingGraph {
 		}
 		mg.createGenVecLabel();
 		mg.createGenTransLabel(net);
-		mg.createIndexForMarks(0);
+		mg.createIndexForMarks();
 		return mg;
 	}
 
@@ -47,13 +47,12 @@ public class MarkingGraph {
 	private final Map<GenVec,String> genvecLabel;
 	private final Map<GenTrans,String> genTransLabel;
 
-	private MarkingGraph(Mark imark) {
+	private MarkingGraph() {
 		markToGenvec = new HashMap<Mark,GenVec>();
 		genvecSize = new HashMap<GenVec,Integer>();
 		markSet = new HashMap<GenVec,List<Mark>>();
 		allgenvec = new ArrayList<GenVec>();
 		allmark = new ArrayList<Mark>();
-		this.imark = imark;
 		markIndex = new HashMap<Mark,Integer>();
 		genvecLabel = new HashMap<GenVec,String>();
 		genTransLabel = new HashMap<GenTrans,String>();
@@ -91,6 +90,10 @@ public class MarkingGraph {
 
 	public final Mark getInitialMark() {
 		return imark;
+	}
+
+	public final void setInitialMark(Mark imark) {
+		this.imark = imark;
 	}
 
 	public final List<GenVec> getGenVec() {
@@ -194,7 +197,6 @@ public class MarkingGraph {
 
 	/**
 	 * Create labels for GenVec groups (G0, G1, I0, A0, etc.)
-	 * @param mp An instance of marking graph
 	 */
 	private void createGenVecLabel() {
 		Map<String,Integer> index = new HashMap<String,Integer>();
@@ -236,9 +238,8 @@ public class MarkingGraph {
 	/**
 	 * Make indices of markings for each groups.
 	 * The index starts with baseIndex
-	 * @param baseIndex An integer to represent the baseIndex
 	 */
-	private void createIndexForMarks(int baseIndex) {
+	private void createIndexForMarks() {
 		Map<GenVec,List<Mark>> markSet = new HashMap<GenVec,List<Mark>>();
 		for (Mark m : getMark()) {
 			GenVec genv = getGenVec(m);
@@ -247,8 +248,8 @@ public class MarkingGraph {
 				markSet.put(genv, list);				
 			}
 			List<Mark> list = markSet.get(genv);
-			markIndex.put(m, baseIndex + list.size());
-			markSet.get(genv).add(m);
+			markIndex.put(m, list.size());
+			list.add(m);
 		}
 	}
 	
