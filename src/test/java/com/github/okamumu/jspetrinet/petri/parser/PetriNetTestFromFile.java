@@ -205,7 +205,6 @@ public class PetriNetTestFromFile {
 	}
 
 	@Test
-	@Ignore
 	public void test09() {
     	String file = "example/spnp_example9";
     	Env env = new Env();
@@ -215,6 +214,7 @@ public class PetriNetTestFromFile {
 	}
 
 	@Test
+	@Ignore
 	public void test10() {
     	String file = "example/spnp_example10";
     	Env env = new Env();

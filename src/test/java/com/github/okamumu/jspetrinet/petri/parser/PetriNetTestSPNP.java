@@ -256,12 +256,6 @@ public class PetriNetTestSPNP {
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
 		assertTrue(ctime < 300);
-		assertEquals("IMMsize", 5, mg.getTotalState(GenVec.Type.IMM));
-		assertEquals("GENsize", 4, mg.getTotalState(GenVec.Type.GEN));
-		assertEquals("ABSsize", 0, mg.getTotalState(GenVec.Type.ABS));
-		assertEquals("IMM NNZ", 5, mg.getTotalNNZ(GenVec.Type.IMM));
-		assertEquals("GEN NNZ", 6, mg.getTotalNNZ(GenVec.Type.GEN));
-		assertEquals("ABS NNZ", 0, mg.getTotalNNZ(GenVec.Type.ABS));
 		int[] size = {4,1,1,2,1};
 		int[] nnz = {4,1,1,4,1};
 		for (int i=0; i<size.length; i++) {
@@ -271,4 +265,21 @@ public class PetriNetTestSPNP {
 		}
 	}
 
+	@Test
+	public void testExRaid6tan() throws IOException, JSPNException {
+    	String file = "example/raid6";
+    	Env env = new Env();
+    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+		long start = System.nanoTime();
+		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
+		double ctime = (System.nanoTime() - start) / 1000000000.0;
+		assertTrue(ctime < 300);
+		int[] size = {1,1,2,1};
+		int[] nnz = {1,1,4,1};
+		for (int i=0; i<size.length; i++) {
+			GenVec g = mg.getGenVec().get(i);
+			assertEquals("Size" + g.getString(net), Integer.valueOf(size[i]), mg.getGenVecSize(g));
+			assertEquals("NNZ" + g.getString(net), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
+		}
+	}
 }

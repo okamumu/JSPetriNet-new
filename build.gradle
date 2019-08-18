@@ -4,8 +4,9 @@ plugins {
     id 'eclipse'
     id 'jacoco'
     id 'antlr'
+    id 'com.github.johnrengelman.shadow' version '5.0.0'
 }
-
+ 
 repositories {
     maven {
         url "https://okamumu.github.io/JMTRandom/repository/"
@@ -25,13 +26,13 @@ configurations {
 }
 
 dependencies {
-//    compile group: 'commons-collections', name: 'commons-collections', version: '3.2'
     compile group: 'org.slf4j', name:'slf4j-api', version: '1.7.2'
     compile group: 'ch.qos.logback', name:'logback-classic', version: '1.0.9'
     compile group: 'ch.qos.logback', name:'logback-core', version: '1.0.9'
     compile group: 'com.github.okamumu', name:'jmtrandom', version: '0.1.0'
     compile group: 'com.github.okamumu', name:'jmatout', version: '0.9.1'
     compile group: 'org.antlr', name: 'antlr4-runtime', version: '4.7.1'
+    compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
 
     testImplementation group: 'junit', name:'junit', version: '4.12'
     antlr group: 'org.antlr', name:'antlr4', version:'4.7.1'
@@ -39,15 +40,6 @@ dependencies {
 
 generateGrammarSource {
     maxHeapSize = "64m"
-
-    // Keep a copy of generated sources
-    // doLast {
-    //     println "Copying generated grammar lexer/parser files to main directory."
-    //     copy {
-    //         from "${buildDir}/generated-src/antlr/main"
-    //         into "generated-src/main/java"
-    //     }
-    // }
 }
 
 javadoc {
@@ -60,9 +52,9 @@ compileJava {
   options.encoding = defaultEncoding
 }
 
-test {
-    testLogging {
-        events 'skipped', 'failed'
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.github.okamumu.jspetrinet.CommandLineMain'
     }
 }
 
@@ -75,4 +67,4 @@ task copyDocs(type: Copy, dependsOn:[javadoc]) {
 }
 
 // Define the main class for the application
-mainClassName = 'com.github.okamumu.jspetrinet.App'
+mainClassName = 'com.github.okamumu.jspetrinet.CommandLineMain'

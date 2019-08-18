@@ -36,6 +36,7 @@ public class PNWriter {
 	private final LinkedList<Object> novisited;
 	private final ASTEnv env;
 	private final Net net;
+	private int cluster;
 
 	private final PrintWriter bw;
 	
@@ -79,6 +80,7 @@ public class PNWriter {
 		this.env = env;
 		this.net = net;
 		this.bw = bw;
+		cluster = 0;
 	}
 	
 	private void doDraw() {
@@ -86,18 +88,20 @@ public class PNWriter {
 		novisited.addAll(net.getImmTransSet());
 		novisited.addAll(net.getExpTransSet());
 		novisited.addAll(net.getGenTransSet());
+		bw.println("digraph { layout=dot; overlap=false; splines=true; node [fontsize=10];");
 		while (!novisited.isEmpty()) {
 			Object c = novisited.removeFirst();
 			if (!visited.contains(c)) {
 				draw(c);
 			}
 		}
+		bw.println("}");
 	}
 
 	private void draw(Object start) {
 		LinkedList<Object> novisited = new LinkedList<Object>();
 		novisited.addLast(start);
-		bw.println("digraph { layout=dot; overlap=false; splines=true; node [fontsize=10];");
+		bw.println("subgraph cluster" + cluster + " {");
 		while (!novisited.isEmpty()) {
 			Object component = novisited.removeFirst();
 			if (visited.contains(component)) {
@@ -159,7 +163,8 @@ public class PNWriter {
 			}			
 			visited.add(component);
 		}
-		bw.println("}");		
+		bw.println("}");
+		cluster++;
 	}
 
 	private String makeTransLabel(Trans tr) {
