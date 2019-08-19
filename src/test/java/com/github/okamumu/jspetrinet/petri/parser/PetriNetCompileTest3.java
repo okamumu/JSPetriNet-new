@@ -51,7 +51,8 @@ public class PetriNetCompileTest3 {
     	str.append("harc P3 to T1\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
@@ -83,7 +84,8 @@ public class PetriNetCompileTest3 {
     	str.append("mu = 1\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
@@ -116,7 +118,8 @@ public class PetriNetCompileTest3 {
     	str.append("arc T3 to P4\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
@@ -149,7 +152,8 @@ public class PetriNetCompileTest3 {
     	str.append("arc T3 to P4\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkWriter.writeMark(net, mg);
@@ -181,7 +185,8 @@ public class PetriNetCompileTest3 {
     	str.append("arc T2 to P4\n");
     	str.append("harc P3 to T1\n");
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromString(str.toString(), env);
+    	NetBuilder.buildFromString(str.toString(), env);
+    	Net net = FactoryPN.compile(env);
     	PNWriter.write(net, env);
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		MarkWriter.writeMark(net, mg);

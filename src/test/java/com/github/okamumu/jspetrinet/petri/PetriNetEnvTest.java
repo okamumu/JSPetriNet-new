@@ -22,8 +22,8 @@ public class PetriNetEnvTest {
     @Before
     public void setUp() {
     	env = new Env();
-    	FactoryPN factory = FactoryPN.getInstance();
-    	FactoryPN.Node node = factory.new Node();
+//    	FactoryPN factory = FactoryPN.getInstance();
+    	Node node = new Node();
     	node.put("vanishable", true);
     	env.put("P1", node);
     }

@@ -37,24 +37,24 @@ import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
 public class NetBuilder {
 
-	static public Net buildFromFile(ASTEnv env) throws InvalidDefinition, ASTException, IOException {
+	static public ASTEnv buildFromFile(ASTEnv env) throws InvalidDefinition, ASTException, IOException {
 		InputStream is = System.in;
 		NetBuilder builder = new NetBuilder(env);
 		builder.parseProg(is);
-    	return FactoryPN.getInstance().compilePN(env);
+    	return env;
 	}
 
-	static public Net buildFromFile(String file, ASTEnv env) throws InvalidDefinition, ASTException, IOException {
+	static public ASTEnv buildFromFile(String file, ASTEnv env) throws InvalidDefinition, ASTException, IOException {
 		InputStream is = Files.newInputStream(Paths.get(file));
 		NetBuilder builder = new NetBuilder(env);
 		builder.parseProg(is);
-    	return FactoryPN.getInstance().compilePN(env);
+    	return env;
 	}
 
-	static public Net buildFromString(String in, ASTEnv env) throws InvalidDefinition, ASTException {
+	static public ASTEnv buildFromString(String in, ASTEnv env) throws InvalidDefinition, ASTException {
 		NetBuilder builder = new NetBuilder(env);
 		builder.parseProg(in);
-		return FactoryPN.getInstance().compilePN(env);
+		return env;
 	}
 
 	static public AST buildExpression(String in) throws GrammarError {
@@ -67,16 +67,13 @@ public class NetBuilder {
 	private final LinkedList<AST> stack;
 	private final LinkedList<String> errors;
 	private final ASTEnv env;
-	private final FactoryPN factory;
-	private final LinkedList<FactoryPN.Node> node;
+	private final LinkedList<Node> node;
 
 	private NetBuilder(ASTEnv env) {
 		this.env = env;
         logger = LoggerFactory.getLogger(NetBuilder.class);
-        factory = FactoryPN.getInstance();
-    	factory.reset();
     	stack = new LinkedList<AST>();
-    	node = new LinkedList<FactoryPN.Node>();
+    	node = new LinkedList<Node>();
     	errors = new LinkedList<String>();
 	}
 	
@@ -123,7 +120,7 @@ public class NetBuilder {
 	}
 	
 	public void createNewNode() {
-		node.push(factory.new Node());
+		node.push(new Node());
 		logger.debug("Create a new option node");
 	}
 
@@ -343,7 +340,7 @@ public class NetBuilder {
 		stack.push(retval);
 	}
 
-	private AST buildConstDist(FactoryPN.Node node) {
+	private AST buildConstDist(Node node) {
 		AST value = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			switch (entry.getKey()) {
@@ -358,7 +355,7 @@ public class NetBuilder {
 		return new ConstDist(value);
 	}
 
-	private AST buildUnifDist(FactoryPN.Node node) {
+	private AST buildUnifDist(Node node) {
 		AST min = ASTValue.getAST(0.0);
 		AST max = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
@@ -378,7 +375,7 @@ public class NetBuilder {
 		return new UnifDist(min, max);
 	}
 
-	private AST buildExpDist(FactoryPN.Node node) {
+	private AST buildExpDist(Node node) {
 		AST rate = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			switch (entry.getKey()) {
@@ -393,7 +390,7 @@ public class NetBuilder {
 		return new ExpDist(rate);
 	}
 
-	private AST buildMinFunc(FactoryPN.Node node) {
+	private AST buildMinFunc(Node node) {
 		ASTList args = new ASTList();
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
@@ -402,7 +399,7 @@ public class NetBuilder {
 		return new ASTMathFunc(args, "min");
 	}
 
-	private AST buildMaxFunc(FactoryPN.Node node) {
+	private AST buildMaxFunc(Node node) {
 		ASTList args = new ASTList();
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			args.add((AST) entry.getValue());
@@ -411,7 +408,7 @@ public class NetBuilder {
 		return new ASTMathFunc(args, "max");
 	}
 
-	private AST buildPowFunc(FactoryPN.Node node) {
+	private AST buildPowFunc(Node node) {
 		AST x = ASTValue.getAST(1.0);
 		AST n = ASTValue.getAST(1);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
@@ -434,7 +431,7 @@ public class NetBuilder {
 		return new ASTMathFunc(args, "pow");
 	}
 
-	private AST buildSqrtFunc(FactoryPN.Node node) {
+	private AST buildSqrtFunc(Node node) {
 		AST x = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			switch (entry.getKey()) {
@@ -451,7 +448,7 @@ public class NetBuilder {
 		return new ASTMathFunc(args, "sqrt");
 	}
 
-	private AST buildExpFunc(FactoryPN.Node node) {
+	private AST buildExpFunc(Node node) {
 		AST x = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			switch (entry.getKey()) {
@@ -468,7 +465,7 @@ public class NetBuilder {
 		return new ASTMathFunc(args, "exp");
 	}
 
-	private AST buildLogFunc(FactoryPN.Node node) {
+	private AST buildLogFunc(Node node) {
 		AST x = ASTValue.getAST(1.0);
 		for (Map.Entry<String, Object> entry : node.getOptEntry()) {
 			switch (entry.getKey()) {

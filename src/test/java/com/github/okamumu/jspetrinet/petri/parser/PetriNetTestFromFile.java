@@ -57,7 +57,8 @@ public class PetriNetTestFromFile {
 	public Net exampleMake(String file, ASTEnv env) {
 		Net net = null;
 		try {
-	    	net = NetBuilder.buildFromFile(file + ".spn", env);
+	    	NetBuilder.buildFromFile(file + ".spn", env);
+	    	net = FactoryPN.compile(env);
 	    	PNWriter.write(file + "_pn.dot", net, env);
 			out.println("dot -Tpdf -o " + file + "_pn.pdf " + file + "_pn.dot");
 		} catch (IOException e) {

@@ -19,7 +19,6 @@ import com.github.okamumu.jspetrinet.marking.MarkingGraph;
 import com.github.okamumu.jspetrinet.marking.method.DFS;
 import com.github.okamumu.jspetrinet.matrix.MarkingMatrix;
 import com.github.okamumu.jspetrinet.petri.*;
-import com.github.okamumu.jspetrinet.petri.FactoryPN.Node;
 import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.writer.MarkWriter;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
@@ -34,29 +33,29 @@ public class PetriNetMarkingTest {
     public void setUp() throws ObjectNotFoundInASTEnv, InvalidDefinition {
     	env = new Env();
     	env.put("f1", ASTValue.getAST(1));
-    	FactoryPN factory = FactoryPN.getInstance();
-    	factory.reset();
+//    	FactoryPN factory = FactoryPN.getInstance();
+//    	factory.reset();
 
-    	FactoryPN.Node node;
-    	node = factory.new Node();
+    	Node node;
+    	node = new Node();
     	node.put("type", "place");
     	node.put("label", "P1");
     	env.put("P1", node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "place");
     	node.put("label", "P2");
     	env.put("P2", node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "imm");
     	node.put("label", "T1");
     	env.put("T1", node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "arc");
     	node.put("src", "P1");
     	node.put("dest", "T1");
     	node.put("multi", env.get("f1"));
     	env.put(node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "arc");
     	node.put("src", "T1");
     	node.put("dest", "P2");
@@ -66,7 +65,7 @@ public class PetriNetMarkingTest {
     @Test
 	public void testPrintNet() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
     		PrintWriter bw = new PrintWriter(System.out);
         	PNWriter.write(net, null);
         	int[] vec = {1,0};
@@ -86,7 +85,7 @@ public class PetriNetMarkingTest {
     @Test
 	public void testMakingMatrix() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
     		PrintWriter bw = new PrintWriter(System.out);
         	PNWriter.write(net, null);
         	int[] vec = {1,0};

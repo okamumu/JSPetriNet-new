@@ -35,8 +35,6 @@ import com.github.okamumu.jspetrinet.matrix.ASTVector;
 import com.github.okamumu.jspetrinet.matrix.GTuple;
 import com.github.okamumu.jspetrinet.matrix.MarkingMatrix;
 import com.github.okamumu.jspetrinet.petri.*;
-import com.github.okamumu.jspetrinet.petri.FactoryPN.Node;
-import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.writer.MarkWriter;
 import com.github.okamumu.jspetrinet.writer.MatlabMatrixWriter;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
@@ -52,45 +50,45 @@ public class PetriNetMarkingTest3 {
     @Before
     public void setUp() throws ObjectNotFoundInASTEnv, InvalidDefinition {
     	env = new Env();
-    	FactoryPN factory = FactoryPN.getInstance();
-    	factory.reset();
-    	FactoryPN.Node node;
+//    	FactoryPN factory = FactoryPN.getInstance();
+//    	factory.reset();
+    	Node node;
 
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "place");
     	node.put("label", "PService");
     	env.put("PService", node);
 
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "exp");
     	node.put("label", "TArrival");
     	node.put("rate", ASTValue.getAST(0.1));
     	node.put("guard", new ASTComparator(new ASTNToken("PService"), ASTValue.getAST(10), "<="));
     	env.put("TArrival", node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "exp");
     	node.put("label", "TService");
     	node.put("rate", new ASTArithmetic(new ASTNToken("PService"), ASTValue.getAST(1.0), "*"));
     	env.put("TService", node);
 
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "arc");
     	node.put("src", "TArrival");
     	node.put("dest", "PService");
     	env.put(node);
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "arc");
     	node.put("src", "PService");
     	node.put("dest", "TService");
     	env.put(node);
     	
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "reward");
     	node.put("label", "reward1");
     	node.put("formula", new ASTIfThenElse(new ASTComparator(new ASTNToken("PService"), ASTValue.getAST(5), ">="), ASTValue.getAST(1), ASTValue.getAST(0)));
     	env.put(node);
 
-    	node = factory.new Node();
+    	node = new Node();
     	node.put("type", "reward");
     	node.put("label", "reward2");
     	node.put("formula", new ASTIfThenElse(new ASTEnableCond("TArrival"), ASTValue.getAST(1), ASTValue.getAST(0)));
@@ -100,7 +98,7 @@ public class PetriNetMarkingTest3 {
     @Test
 	public void testPrintNet() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
     		PrintWriter bw = new PrintWriter(System.out);
         	PNWriter.write(net, env);
         	bw.flush();
@@ -113,7 +111,7 @@ public class PetriNetMarkingTest3 {
     @Test
 	public void testMarking() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
     		PrintWriter bw = new PrintWriter(System.out);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
@@ -128,13 +126,13 @@ public class PetriNetMarkingTest3 {
     @Test
 	public void testMarkingMat() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
 
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			for (Map.Entry<GenVec,List<Mark>> entry : mg.getMarkSet().entrySet()) {
-				System.out.println(entry.getKey().getString(net));
+				System.out.println(entry.getKey());
 				for (Mark m : entry.getValue()) {
 //					System.out.print(mat.getMarkIndex().get(m) + " : ");
 //					System.out.println(m.getString(net));
@@ -144,9 +142,9 @@ public class PetriNetMarkingTest3 {
 				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc()));
 				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getDest()));
 				System.out.println(mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans()));
-				System.out.print(m.getKey().getSrc().getString(net));
+				System.out.print(m.getKey().getSrc());
 				System.out.print(" => ");
-				System.out.print(m.getKey().getDest().getString(net));
+				System.out.print(m.getKey().getDest());
 				System.out.println(" Trans:" + m.getKey().getGenTrans());
 				System.out.print(m.getValue().getISize());
 				System.out.print(" ");
@@ -158,7 +156,7 @@ public class PetriNetMarkingTest3 {
 			for (Map.Entry<GTuple,ASTVector> m : mat.getSumVectorSet().entrySet()) {
 				System.out.print(mat.getMarkingGraph().getGenVecLabel().get(m.getKey().getSrc()));
 				System.out.println(mat.getMarkingGraph().getGenTransLabel().get(m.getKey().getGenTrans()));
-				System.out.print(m.getKey().getSrc().getString(net));
+				System.out.print(m.getKey().getSrc());
 				System.out.println(" Trans:" + m.getKey().getGenTrans());
 				System.out.println(Arrays.toString(m.getValue().getValue(env)));
 			}
@@ -171,7 +169,7 @@ public class PetriNetMarkingTest3 {
     @Test
 	public void testMarkingMatlabMat() {
     	try {
-    		Net net = FactoryPN.getInstance().compilePN(env);
+    		Net net = FactoryPN.compile(env);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);

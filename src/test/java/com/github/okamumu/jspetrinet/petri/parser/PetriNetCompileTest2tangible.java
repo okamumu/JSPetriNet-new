@@ -45,7 +45,8 @@ public class PetriNetCompileTest2tangible {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -73,7 +74,8 @@ public class PetriNetCompileTest2tangible {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
@@ -102,7 +104,8 @@ public class PetriNetCompileTest2tangible {
     	str.append("reward cumstomers #Pservice\n");
 		try {
 	    	Env env = new Env();
-	    	Net net = NetBuilder.buildFromString(str.toString(), env);
+	    	NetBuilder.buildFromString(str.toString(), env);
+	    	Net net = FactoryPN.compile(env);
 			PrintWriter bw = new PrintWriter(System.out);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());

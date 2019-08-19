@@ -2,9 +2,7 @@ package com.github.okamumu.jspetrinet.petri;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import com.github.okamumu.jspetrinet.ast.AST;
 import com.github.okamumu.jspetrinet.ast.ASTEnv;
@@ -13,8 +11,6 @@ import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.InvalidValue;
 import com.github.okamumu.jspetrinet.exception.ObjectNotFoundInASTEnv;
-import com.github.okamumu.jspetrinet.exception.UnknownOption;
-import com.github.okamumu.jspetrinet.exception.UnknownPolicy;
 import com.github.okamumu.jspetrinet.marking.Mark;
 import com.github.okamumu.jspetrinet.petri.arcs.InArc;
 import com.github.okamumu.jspetrinet.petri.arcs.InhibitArc;
@@ -34,117 +30,85 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class FactoryPN {
+	
+	/**
+	 * A method to compile Petri net from definitions
+	 * @param env An instance of environment. All the instances of components are registered in this environment.
+	 * @return An instance of Net
+	 * @throws InvalidDefinition Exception when the definition is invalid
+	 * @throws ASTException A exception to evaluate AST
+	 */
+	public static Net compile(ASTEnv env) throws InvalidDefinition, ASTException {
+		FactoryPN factory = new FactoryPN();
+		factory.compilePN(env);
+		int[] vec = factory.createInitMark();
+		return new Net(new Mark(vec), factory.place,
+				factory.immtrans, factory.exptrans, factory.gentrans, factory.rewards);
+	}
+
+	/**
+	 * A method to compile Petri net from definitions
+	 * @param imark A map to represent the initial marking
+	 * @param env An instance of environment. All the instances of components are registered in this environment.
+	 * @return An instance of Net
+	 * @throws InvalidDefinition Exception when the definition is invalid
+	 * @throws ASTException A exception to evaluate AST
+	 */
+	public static Net compile(Map<String,Integer> imark, ASTEnv env) throws InvalidDefinition, ASTException {
+		FactoryPN factory = new FactoryPN();
+		factory.compilePN(env);
+		int[] vec = factory.createInitMark(env, imark);
+		return new Net(new Mark(vec), factory.place,
+				factory.immtrans, factory.exptrans, factory.gentrans, factory.rewards);
+	}
+
 	private int placeid;
 	private int immtransid;
 	private int exptransid;
 	private int gentransid;
 	private int rewardid;
 	
-	private ArrayList<Integer> initMark;
+	private final ArrayList<Integer> initMark;
 	
-	private Logger logger;
+    private final ArrayList<Place> place;
+    private final ArrayList<ImmTrans> immtrans;
+    private final ArrayList<ExpTrans> exptrans;
+    private final ArrayList<GenTrans> gentrans;
+    private final ArrayList<String> rewards;
 
-	/**
-	 * A inner class to hold an instance of FactoryPN
-	 *
-	 */
-    public static class FactoryPNInstanceHolder {
-    	private static final FactoryPN instance = new FactoryPN();
-    }
+    private final Logger logger;
 
-    /**
-     * A method to get an instance
-     * @return An object of FactoryPN
-     */
-	public static FactoryPN getInstance() {
-		return FactoryPNInstanceHolder.instance;
-	}
+//	/**
+//	 * A inner class to hold an instance of FactoryPN
+//	 *
+//	 */
+//    public static class FactoryPNInstanceHolder {
+//    	private static final FactoryPN instance = new FactoryPN();
+//    }
+//
+//    /**
+//     * A method to get an instance
+//     * @return An object of FactoryPN
+//     */
+//	public static FactoryPN getInstance() {
+//		return FactoryPNInstanceHolder.instance;
+//	}
 
 	private FactoryPN() {
-		reset();
         logger = LoggerFactory.getLogger(FactoryPN.class);
-	}
-
-	/**
-	 * A method to reset the indices for all components.
-	 */
-	public void reset() {
 		placeid = 0;
 		immtransid = 0;
 		exptransid = 0;
 		gentransid = 0;
 		rewardid = 0;
 		initMark = new ArrayList<Integer>();
+        place = new ArrayList<Place>();
+        immtrans = new ArrayList<ImmTrans>();
+        exptrans = new ArrayList<ExpTrans>();
+        gentrans = new ArrayList<GenTrans>();
+        rewards = new ArrayList<String>();
 	}
 
-	/**
-	 * Inner class for a node of Petri net.
-	 * This class keeps the definitions of components by hashmap.
-	 * Based on the definition in this class, compile an instance of PN
-	 *
-	 */
-	public class Node {
-		public final Map<String,Object> options;
-		
-		/**
-		 * Constructor
-		 */
-		public Node() {
-			options = new HashMap<String,Object>();
-		}
-		
-//		/**
-//		 * A method to get an object
-//		 * @param key A string for a key
-//		 * @param value A default value, which is used when the given key does not exist.
-//		 * @return An object
-//		 */
-//		public Object getOrDefault(String key, Object value) {
-//			return options.getOrDefault(key, value);
-//		}
-
-		/**
-		 * Get a size of options
-		 * @return A size
-		 */
-		public int size() {
-			return options.size();
-		}
-		
-		/**
-		 * Method to get the entry set of options
-		 * @return A set of entries
-		 */
-		public Set<Map.Entry<String,Object>> getOptEntry() {
-			return options.entrySet();
-		}
-		
-		/**
-		 * A method to set a key and an object
-		 * @param key A string
-		 * @param value An object
-		 */
-		public void put(String key, Object value) {
-			options.put(key, value);
-		}
-
-		/**
-		 * Get a string for a type of node
-		 * @return A string
-		 */
-		public String getType() {
-			return (String) options.getOrDefault("type", null);
-		}
-
-		/**
-		 * Setter for a type of node
-		 * @param string A name of type
-		 */
-		public void setType(String string) {
-			options.put("type", string);
-		}
-	}
-	
 	private Integer evalInteger(Object f, ASTEnv env) throws ASTException {
 		Object obj = ((AST) f).eval(env);
 		if (obj instanceof Integer) {
@@ -522,19 +486,12 @@ public class FactoryPN {
 	}
 
 	/**
-	 * A method to compile Petri net from definitions
+	 * A method to create instances of places and transitions from definitions.
 	 * @param env An instance of environment. All the instances of components are registered in this environment.
-	 * @return An instance of Net
 	 * @throws InvalidDefinition Exception when the definition is invalid
 	 * @throws ASTException A exception to evaluate AST
 	 */
-	public Net compilePN(ASTEnv env) throws InvalidDefinition, ASTException {
-        ArrayList<Place> place = new ArrayList<Place>();
-        ArrayList<ImmTrans> immtrans = new ArrayList<ImmTrans>();
-        ArrayList<ExpTrans> exptrans = new ArrayList<ExpTrans>();
-        ArrayList<GenTrans> gentrans = new ArrayList<GenTrans>();
-        ArrayList<String> rewards = new ArrayList<String>();
-
+	private void compilePN(ASTEnv env) throws InvalidDefinition, ASTException {
         ArrayList<String> keys = new ArrayList<String>(env.keySet());
         Collections.sort(keys);
 
@@ -626,17 +583,28 @@ public class FactoryPN {
         		}
         	}
 		}
-        
-        // create init
+
+        // sort
+		Collections.sort(immtrans);
+		Collections.sort(exptrans);
+		Collections.sort(gentrans);
+		Collections.sort(rewards);
+	}
+	
+	private int[] createInitMark() {
         int[] vec = new int [place.size()];
         for (int i=0; i<vec.length; i++) {
         	vec[i] = initMark.get(i);
         }
-        
-        Collections.sort(immtrans);
-        Collections.sort(exptrans);
-        Collections.sort(gentrans);
-        Collections.sort(rewards);
-        return new Net(new Mark(vec), place, immtrans, exptrans, gentrans, rewards);
+        return vec;		
+	}
+
+	private int[] createInitMark(ASTEnv env, Map<String,Integer> imark) throws ObjectNotFoundInASTEnv {
+        int[] vec = new int [place.size()];
+        for (Map.Entry<String,Integer> entry : imark.entrySet()) {
+        	Place p = (Place) env.get(entry.getKey());
+        	vec[p.getIndex()] = entry.getValue();
+        }
+        return vec;
 	}
 }

@@ -32,9 +32,9 @@ public class PetriNetTest {
     	places.add(new Place("P1", 0, 10));
     	places.add(new Place("P2", 0, 10));
     	places.add(new Place("P3", 0, 10));
-    	imm.add(new ImmTrans("T1", 1, ASTValue.getAST(1.0), ASTValue.getAST(true), null, 0, false));
-    	imm.add(new ImmTrans("T2", 2, ASTValue.getAST(1.0), ASTValue.getAST(true), null, 0, false));
-    	imm.add(new ImmTrans("T3", 3, ASTValue.getAST(1.0), ASTValue.getAST(true), null, 0, false));
+    	imm.add(new ImmTrans("T1", 1, ASTValue.getAST(1.0), ASTValue.getAST(true), ASTValue.getAST(null), 0, false));
+    	imm.add(new ImmTrans("T2", 2, ASTValue.getAST(1.0), ASTValue.getAST(true), ASTValue.getAST(null), 0, false));
+    	imm.add(new ImmTrans("T3", 3, ASTValue.getAST(1.0), ASTValue.getAST(true), ASTValue.getAST(null), 0, false));
     	new InArc(places.get(0), imm.get(0), ASTValue.getAST(1));
     	new InArc(places.get(1), imm.get(0), ASTValue.getAST(1));
     	new InArc(places.get(2), imm.get(1), ASTValue.getAST(1));

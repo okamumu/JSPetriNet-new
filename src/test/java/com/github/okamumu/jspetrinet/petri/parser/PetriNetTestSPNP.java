@@ -42,12 +42,42 @@ import com.github.okamumu.jspetrinet.writer.StateWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
 public class PetriNetTestSPNP {
+
+	public static String getString(Net net, GenVec g) {
+		String result = "(";
+		for (GenTrans t: net.getGenTransSet()) {
+			switch(g.get(t.getIndex())) {
+			case 0:
+				break;
+			case 1:
+				if (!result.equals("(")) {
+					result += " ";
+				}
+				result += t.getLabel() + "->enable";
+				break;
+			case 2:
+				if (!result.equals("(")) {
+					result += " ";
+				}
+				result += t.getLabel() + "->preemption";
+				break;
+			default:
+				break;
+			}
+		}
+		if (result.equals("(")) {
+			result += "EXP";
+		}
+		result += ")" + g.getType().toString();		
+		return result;
+	}
 	
 	@Test
 	public void testEx1() throws IOException, JSPNException {
     	String file = "example/spnp_example1";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -64,7 +94,8 @@ public class PetriNetTestSPNP {
 	public void testEx1tan() throws IOException, JSPNException {
     	String file = "example/spnp_example1";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -81,7 +112,8 @@ public class PetriNetTestSPNP {
 	public void testEx2() throws IOException, JSPNException {
     	String file = "example/spnp_example2";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -98,7 +130,8 @@ public class PetriNetTestSPNP {
 	public void testEx2tan() throws IOException, JSPNException {
     	String file = "example/spnp_example2";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -115,7 +148,8 @@ public class PetriNetTestSPNP {
 	public void testEx3() throws IOException, JSPNException {
     	String file = "example/spnp_example3";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -132,7 +166,8 @@ public class PetriNetTestSPNP {
 	public void testEx3tan() throws IOException, JSPNException {
     	String file = "example/spnp_example3";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -149,7 +184,8 @@ public class PetriNetTestSPNP {
 	public void testEx4() throws IOException, JSPNException {
     	String file = "example/spnp_example4";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -166,7 +202,8 @@ public class PetriNetTestSPNP {
 	public void testEx4tan() throws IOException, JSPNException {
     	String file = "example/spnp_example4";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -183,7 +220,8 @@ public class PetriNetTestSPNP {
 	public void testEx5() throws IOException, JSPNException {
     	String file = "example/spnp_example5";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -200,7 +238,8 @@ public class PetriNetTestSPNP {
 	public void testEx5tan() throws IOException, JSPNException {
     	String file = "example/spnp_example5";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -217,7 +256,8 @@ public class PetriNetTestSPNP {
 	public void testEx6() throws IOException, JSPNException {
     	String file = "example/spnp_example6";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -234,7 +274,8 @@ public class PetriNetTestSPNP {
 	public void testEx6tan() throws IOException, JSPNException {
     	String file = "example/spnp_example6";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -251,7 +292,8 @@ public class PetriNetTestSPNP {
 	public void testExRaid6() throws IOException, JSPNException {
     	String file = "example/raid6";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -260,8 +302,8 @@ public class PetriNetTestSPNP {
 		int[] nnz = {4,1,1,4,1};
 		for (int i=0; i<size.length; i++) {
 			GenVec g = mg.getGenVec().get(i);
-			assertEquals("Size" + g.getString(net), Integer.valueOf(size[i]), mg.getGenVecSize(g));
-			assertEquals("NNZ" + g.getString(net), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
+			assertEquals("Size" + getString(net,g), Integer.valueOf(size[i]), mg.getGenVecSize(g));
+			assertEquals("NNZ" + getString(net,g), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
 		}
 	}
 
@@ -269,7 +311,8 @@ public class PetriNetTestSPNP {
 	public void testExRaid6tan() throws IOException, JSPNException {
     	String file = "example/raid6";
     	Env env = new Env();
-    	Net net = NetBuilder.buildFromFile(file + ".spn", env);
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
 		long start = System.nanoTime();
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
 		double ctime = (System.nanoTime() - start) / 1000000000.0;
@@ -278,8 +321,8 @@ public class PetriNetTestSPNP {
 		int[] nnz = {1,1,4,1};
 		for (int i=0; i<size.length; i++) {
 			GenVec g = mg.getGenVec().get(i);
-			assertEquals("Size" + g.getString(net), Integer.valueOf(size[i]), mg.getGenVecSize(g));
-			assertEquals("NNZ" + g.getString(net), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
+			assertEquals("Size" + getString(net,g), Integer.valueOf(size[i]), mg.getGenVecSize(g));
+			assertEquals("NNZ" + getString(net,g), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
 		}
 	}
 }

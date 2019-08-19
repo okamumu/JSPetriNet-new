@@ -70,34 +70,34 @@ public class GenVec extends StateVector {
 	 * @param net An instance of Net
 	 * @return A string
 	 */
-	public String getString(Net net) {
-		String result = "(";
-		for (GenTrans t: net.getGenTransSet()) {
-			switch(this.get(t.getIndex())) {
-			case 0:
-				break;
-			case 1:
-				if (!result.equals("(")) {
-					result += " ";
-				}
-				result += t.getLabel() + "->enable";
-				break;
-			case 2:
-				if (!result.equals("(")) {
-					result += " ";
-				}
-				result += t.getLabel() + "->preemption";
-				break;
-			default:
-				break;
-			}
-		}
-		if (result.equals("(")) {
-			result += "EXP";
-		}
-		result += ")" + type.toString();		
-		return result;
-	}
+//	public String getString(Net net) {
+//		String result = "(";
+//		for (GenTrans t: net.getGenTransSet()) {
+//			switch(this.get(t.getIndex())) {
+//			case 0:
+//				break;
+//			case 1:
+//				if (!result.equals("(")) {
+//					result += " ";
+//				}
+//				result += t.getLabel() + "->enable";
+//				break;
+//			case 2:
+//				if (!result.equals("(")) {
+//					result += " ";
+//				}
+//				result += t.getLabel() + "->preemption";
+//				break;
+//			default:
+//				break;
+//			}
+//		}
+//		if (result.equals("(")) {
+//			result += "EXP";
+//		}
+//		result += ")" + type.toString();		
+//		return result;
+//	}
 	
 	public boolean isSameClass(GenVec other) {
 		if (this == other) {
@@ -128,14 +128,4 @@ public class GenVec extends StateVector {
 		GenVec other = (GenVec) obj;
 		return type == other.type;
 	}
-
-//	@Override
-//	public int compareTo(GenVec other) {
-//		int retval = type.compareTo(other.type);
-//		if (retval == 0) {
-//			return vec.compareTo(other.vec);
-//		} else {
-//			return retval;
-//		}
-//	}
 }

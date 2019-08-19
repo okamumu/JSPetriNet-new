@@ -1,6 +1,11 @@
 package com.github.okamumu.jspetrinet;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -11,11 +16,20 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.LoggerFactory;
 
+import com.github.okamumu.jspetrinet.ast.ASTEnv;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
+import com.github.okamumu.jspetrinet.exception.JSPNException;
+import com.github.okamumu.jspetrinet.marking.GenVec;
+import com.github.okamumu.jspetrinet.marking.MarkingGraph;
+import com.github.okamumu.jspetrinet.marking.method.DFS;
+import com.github.okamumu.jspetrinet.marking.method.DFStangible;
+import com.github.okamumu.jspetrinet.matrix.MarkingMatrix;
 import com.github.okamumu.jspetrinet.petri.Env;
+import com.github.okamumu.jspetrinet.petri.FactoryPN;
 import com.github.okamumu.jspetrinet.petri.Net;
 import com.github.okamumu.jspetrinet.petri.NetBuilder;
+import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
 
 import ch.qos.logback.classic.LoggerContext;
@@ -43,6 +57,7 @@ public class CommandLineMain {
 			cmdView(newargs, new HelpFormatter());
 			break;
 		case "mark":
+			cmdMark(newargs, new HelpFormatter());
 			break;
 		case "sim":
 			break;
@@ -65,13 +80,13 @@ public class CommandLineMain {
 	
 	public static void cmdView(String[] args, HelpFormatter hf) {
 		Options options = new Options();
-		options.addOption(Option.builder("spn")
-				.argName("infile")
+		options.addOption(Option.builder("i")
+				.argName("file")
 				.hasArg()
 				.desc("Input PetriNet definition file")
 				.build());
 		options.addOption(Option.builder("o")
-				.argName("outfile")
+				.argName("file")
 				.hasArg()
 				.desc("Name of output file of a dot file.")
 				.build());
@@ -87,9 +102,14 @@ public class CommandLineMain {
 		}
 
     	Env env = new Env();
-    	Net net;
+    	Net net = null;
 		try {
-			net = buildNet(cmd, env);
+	    	if (cmd.hasOption("i")) {
+	    		NetBuilder.buildFromFile(cmd.getOptionValue("i"), env);
+	    	} else {
+	    		NetBuilder.buildFromFile(env);
+	    	}
+	    	net = FactoryPN.compile(env);
 		} catch (InvalidDefinition e1) {
 			e1.printStackTrace();
 			return;
@@ -114,43 +134,40 @@ public class CommandLineMain {
 	
 	public static void cmdMark(String[] args, HelpFormatter hf) {
 		Options options = new Options();
-		options.addOption(Option.builder("spn")
-				.argName("infile")
+		options.addOption(Option.builder("i")
+				.argName("file")
 				.hasArg(true)
 				.desc("Input PetriNet definition file")
 				.build());
 		options.addOption(Option.builder("imark")
-				.argName("initialmarking")
+				.argName("string")
 				.hasArg(true)
 				.desc("Initial marking")
 				.build());
 		options.addOption(Option.builder("o")
-				.argName("outfile")
+				.argName("file")
 				.hasArg(true)
 				.desc("Prefix of output files")
 				.build());
 		options.addOption(Option.builder("bin")
-				.argName("matlab")
 				.hasArg(false)
 				.desc("Output matrices are as a MATLAB matfile")
 				.build());
 		options.addOption(Option.builder("text")
-				.argName("matlab")
 				.hasArg(false)
 				.desc("Output matrices are text files")
 				.build());
 		options.addOption(Option.builder("tangible")
-				.argName("tangible")
 				.hasArg(false)
 				.desc("Do vanishing for IMM transitions")
 				.build());
 		options.addOption(Option.builder("mgraph")
-				.argName("markgraph")
+				.argName("file")
 				.hasArg(true)
 				.desc("Output of a dot file for marking")
 				.build());
 		options.addOption(Option.builder("mggraph")
-				.argName("groupmarkgraph")
+				.argName("file")
 				.hasArg(true)
 				.desc("Output of a dot file for mark groups")
 				.build());
@@ -169,9 +186,19 @@ public class CommandLineMain {
 		}
 
     	Env env = new Env();
-    	Net net;
+    	Net net = null;
 		try {
-			net = buildNet(cmd, env);
+	    	if (cmd.hasOption("i")) {
+	    		NetBuilder.buildFromFile(cmd.getOptionValue("i"), env);
+	    	} else {
+	    		NetBuilder.buildFromFile(env);
+	    	}
+	    	if (cmd.hasOption("imark")) {
+	    		Map<String,Integer> imark = parseMark(cmd.getOptionValue("imark"));
+	    		net = FactoryPN.compile(imark, env);
+	    	} else {
+	    		net = FactoryPN.compile(env);
+	    	}
 		} catch (InvalidDefinition e1) {
 			e1.printStackTrace();
 			return;
@@ -183,22 +210,107 @@ public class CommandLineMain {
 			return;
 		}
 
-		if (cmd.hasOption("o")) {
-	    	try {
-				PNWriter.write(cmd.getOptionValue("o"), net, env);
-			} catch (IOException e) {
-				e.printStackTrace();
+		System.out.println("Create marking...");
+		long start = System.nanoTime();
+		MarkingGraph mg = null;
+		try {
+			if (cmd.hasOption("tangible")) {
+				mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
+			} else {
+				mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());			
 			}
-		} else {
-	    	PNWriter.write(net, env);
+		} catch (JSPNException e) {
+			e.printStackTrace();
 		}
+		System.out.println("done");
+		System.out.println("computation time    : " + (System.nanoTime() - start) / 1000000000.0 + " (sec)");
+
+		System.out.println(markingToString(net, mg));
+
+//		MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+
 	}
 
-	private static Net buildNet(CommandLine cmd, Env env) throws InvalidDefinition, ASTException, IOException {
-    	if (cmd.hasOption("i")) {
-    		return NetBuilder.buildFromFile(cmd.getOptionValue("i"), env);
-		} else {
-			return NetBuilder.buildFromFile(env);
+	public static Map<String,Integer> parseMark(String str) {
+		Map<String,Integer> result = new HashMap<String,Integer>();
+		String[] ary = str.split(",", 0);
+		Pattern p = Pattern.compile("(\\w+):([0-9]+)");
+		for (String s : ary) {
+			Matcher m = p.matcher(s);
+			if (m.matches()) {
+				String key = m.group(1);
+				int value = Integer.parseInt(m.group(2));
+				result.put(key, value);
+			}
 		}
+		return result;
 	}
+	
+	public static String markingToString(Net net, MarkingGraph mp) {
+		String linesep = System.getProperty("line.separator").toString();
+		StringBuilder res = new StringBuilder();
+		int immtotal = mp.getTotalState(GenVec.Type.IMM);
+		int gentotal = mp.getTotalState(GenVec.Type.GEN);
+		int abstotal = mp.getTotalState(GenVec.Type.ABS);
+		int total = immtotal + gentotal + abstotal;
+		int immnnz = mp.getTotalNNZ(GenVec.Type.IMM);
+		int gennnz = mp.getTotalNNZ(GenVec.Type.GEN);
+		int absnnz = mp.getTotalNNZ(GenVec.Type.ABS);
+		int nnz = immnnz + gennnz + absnnz;
+		res.append("# of total states         : ").append(total).append(" (").append(nnz).append(")").append(linesep)
+		   .append("# of total IMM states     : ").append(immtotal).append(" (").append(immnnz).append(")").append(linesep)
+		   .append("# of total EXP/GEN states : ").append(gentotal).append(" (").append(gennnz).append(")").append(linesep)
+		   .append("# of total ABS states     : ").append(abstotal).append(" (").append(absnnz).append(")").append(linesep);
+		
+		Iterator<GenVec> iter = mp.getGenVec().iterator();
+		GenVec prev = null;
+		while (iter.hasNext()) {
+			GenVec gv = iter.next();
+			if (!gv.isSameClass(prev)) {
+				res.append(genvecToString(net, gv)).append(linesep);
+			}
+			if (gv.getType() == GenVec.Type.IMM) {
+				res.append("  # of IMM states     : ");
+			}
+			if (gv.getType() == GenVec.Type.GEN) {
+				res.append("  # of Exp/GEN stat   : ");
+			}
+			if (gv.getType() == GenVec.Type.ABS) {
+				res.append("  # of ABS states     : ");
+			}
+			res.append(mp.getGenVecSize(gv)).append(" (").append(mp.getGenVecNNZ(gv)).append(")").append(linesep);
+			prev = gv;
+		}
+		return res.toString();
+	}
+
+	public static String genvecToString(Net net, GenVec g) {
+		String result = "(";
+		for (GenTrans t: net.getGenTransSet()) {
+			switch(g.get(t.getIndex())) {
+			case 0:
+				break;
+			case 1:
+				if (!result.equals("(")) {
+					result += " ";
+				}
+				result += t.getLabel() + "->enable";
+				break;
+			case 2:
+				if (!result.equals("(")) {
+					result += " ";
+				}
+				result += t.getLabel() + "->preemption";
+				break;
+			default:
+				break;
+			}
+		}
+		if (result.equals("(")) {
+			result += "EXP";
+		}
+		result += ")";
+		return result;
+	}
+
 }
