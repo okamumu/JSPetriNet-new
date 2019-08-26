@@ -18,13 +18,14 @@ import com.github.okamumu.jspetrinet.marking.method.CreateMarking;
 import com.github.okamumu.jspetrinet.petri.Net;
 import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 
-public class MarkingGraph {
+public final class MarkingGraph {
 
 	public static MarkingGraph create(Mark init, Net net, ASTEnv env, CreateMarking method) throws JSPNException {
 		Mark init0 = new Mark(init.copy());
 		MarkingGraph mg = new MarkingGraph();
 		method.create(mg, init0, net, env);
-		mg.makingGroupGraph();
+
+		Collections.sort(mg.allmark);
 		Collections.sort(mg.allgenvec, new Comparator<GenVec>() {
 			@Override
 			public int compare(GenVec g1, GenVec g2) {
@@ -36,16 +37,16 @@ public class MarkingGraph {
 				}
 			}
 		});
-		Collections.sort(mg.allmark);
+
 		// count size for each group
 		for (Map.Entry<GenVec,List<Mark>> entry : mg.markSet.entrySet()) {
 			mg.genvecSize.put(entry.getKey(), entry.getValue().size());
-			Collections.sort(entry.getValue());
 		}
 		mg.countNNZ();
 		mg.createGenVecLabel();
 		mg.createGenTransLabel(net);
 		mg.createIndexForMarks();
+		mg.makingGroupGraph();
 		return mg;
 	}
 
@@ -115,10 +116,6 @@ public class MarkingGraph {
 		return markToGenvec.get(m);
 	}
 
-	public final List<Mark> getMark() {
-		return allmark;
-	}
-
 	public final Map<GenVec,List<Mark>> getMarkSet() {
 		return markSet;
 	}
@@ -127,7 +124,7 @@ public class MarkingGraph {
 	 * Getter for a map from GenVec to String (G0, I0, etc.)
 	 * @return A map
 	 */
-	public Map<GenVec,String> getGenVecLabel() {
+	public final Map<GenVec,String> getGenVecLabel() {
 		return genvecLabel;
 	}
 	
@@ -135,7 +132,7 @@ public class MarkingGraph {
 	 * Getter for a string corresponding to general transition (P0, P1, etc.)
 	 * @return A map
 	 */
-	public Map<GenTrans,String> getGenTransLabel() {
+	public final Map<GenTrans,String> getGenTransLabel() {
 		return genTransLabel;
 	}
 
@@ -143,10 +140,15 @@ public class MarkingGraph {
 	 * Getter for a map from a mark to an index
 	 * @return A map
 	 */
-	public Map<Mark,Integer> getMarkIndex() {
+	public final Map<Mark,Integer> getMarkIndex() {
 		return markIndex;
 	}
 
+	/**
+	 * A method to set a mark as a member of GenVec.
+	 * @param m An instance of mark
+	 * @param g An instance of GenVec
+	 */
 	public final void setGenVec(Mark m, GenVec g) {
 		markToGenvec.put(m, g);
 		if (!markSet.containsKey(g)) {
@@ -160,47 +162,23 @@ public class MarkingGraph {
 	/**
 	 * Make connections between GenVec groups
 	 */
-	private void makingGroupGraph() {
-		class GenVecTuple {
-			final GenVec src;
-			final GenVec dest;
-			
-			GenVecTuple(GenVec src, GenVec dest) {
-				this.src = src;
-				this.dest = dest;
+	private void makingGroupGraph() {		
+		Map<GenVec,Set<GenVec>> created = new HashMap<GenVec,Set<GenVec>>();
+		for (Map.Entry<GenVec,List<Mark>> entry : markSet.entrySet()) {
+			GenVec gsrc = entry.getKey();
+			if (!created.containsKey(gsrc)) {
+				created.put(gsrc, new HashSet<GenVec>());
 			}
-
-			@Override
-			public int hashCode() {
-				return Objects.hash(dest, src);
-			}
-
-			@Override
-			public boolean equals(Object obj) {
-				if (this == obj)
-					return true;
-				if (obj == null)
-					return false;
-				if (getClass() != obj.getClass())
-					return false;
-				GenVecTuple other = (GenVecTuple) obj;
-				return Objects.equals(dest, other.dest) && Objects.equals(src, other.src);
-			}
-		}
-		
-		Set<GenVecTuple> created = new HashSet<GenVecTuple>();
-		for (Map.Entry<Mark,GenVec> entry : markToGenvec.entrySet()) {
-			Mark m = entry.getKey();
-			GenVec gsrc = entry.getValue();
-			for (Arc a : m.getOutArc()) {
-				Mark.Arc ma = (Mark.Arc) a;
-				Mark dest = (Mark) ma.getDest();
-				GenVec gdest = markToGenvec.get(dest);
-				GenVecTuple tuple = new GenVecTuple(gsrc, gdest);
-				if (!created.contains(tuple)) {
-					gsrc.new Arc(gsrc, gdest);
-					created.add(tuple);
-				}
+			for (Mark m : entry.getValue()) {
+				for (Arc a : m.getOutArc()) {
+					Mark.Arc ma = (Mark.Arc) a;
+					Mark dest = (Mark) ma.getDest();
+					GenVec gdest = markToGenvec.get(dest);
+					if (!created.get(gsrc).contains(gdest)) {
+						gsrc.new Arc(gsrc, gdest);
+						created.get(gsrc).add(gdest);
+					}
+				}				
 			}
 		}
 	}
@@ -264,7 +242,7 @@ public class MarkingGraph {
 	 */
 	private void createIndexForMarks() {
 		Map<GenVec,List<Mark>> markSet = new HashMap<GenVec,List<Mark>>();
-		for (Mark m : getMark()) {
+		for (Mark m : allmark) {
 			GenVec genv = getGenVec(m);
 			if (!markSet.containsKey(genv)) {
 				List<Mark> list = new ArrayList<Mark>();

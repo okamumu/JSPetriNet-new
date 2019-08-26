@@ -182,7 +182,9 @@ public class MarkingMatrix {
 	 * @throws ASTException An error when AST is converted to numeric
 	 */
 	private void createTransitionMatrix(ASTEnv env, MarkingGraph mp) throws ASTException {
-		for (Mark src : mp.getMark()) {
+		for (Map.Entry<Mark,Integer> entry : mp.getMarkIndex().entrySet()) {
+			Mark src = entry.getKey();
+			Integer i = entry.getValue();
 			GenVec gsrc = mp.getGenVec(src);
 			for (Arc a : src.getOutArc()) {
 				Mark.Arc ma = (Mark.Arc) a;
@@ -192,7 +194,6 @@ public class MarkingMatrix {
 					ImmTrans tr = (ImmTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, null);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, null);
-					Integer i = mp.getMarkIndex().get(src);
 					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);
@@ -203,7 +204,6 @@ public class MarkingMatrix {
 					ExpTrans tr = (ExpTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, null);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, null);
-					Integer i = mp.getMarkIndex().get(src);
 					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);
@@ -214,7 +214,6 @@ public class MarkingMatrix {
 					GenTrans tr = (GenTrans) ma.getTrans();
 					GTuple gtuple = new GTuple(gsrc, gdest, tr);
 					GTuple gtupleSum = new GTuple(gsrc, gsrc, tr);
-					Integer i = mp.getMarkIndex().get(src);
 					Integer j = mp.getMarkIndex().get(dest);
 					ASTMatrix mat = getASTMatrix(mp, gtuple);
 					ASTVector sum = getASTVector(mp, gtupleSum);

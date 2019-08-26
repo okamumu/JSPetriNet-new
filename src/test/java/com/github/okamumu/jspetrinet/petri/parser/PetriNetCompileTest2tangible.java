@@ -109,7 +109,7 @@ public class PetriNetCompileTest2tangible {
 			PrintWriter bw = new PrintWriter(System.out);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
 	    	bw.flush();
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);

@@ -6,24 +6,22 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
 
 import com.github.okamumu.jspetrinet.graph.Arc;
 import com.github.okamumu.jspetrinet.marking.GenVec;
 import com.github.okamumu.jspetrinet.marking.Mark;
 import com.github.okamumu.jspetrinet.marking.MarkingGraph;
-import com.github.okamumu.jspetrinet.petri.Net;
-import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
-import com.github.okamumu.jspetrinet.petri.nodes.Place;
 
 public class MarkWriter {
-	private final Net net;
+//	private final Net net;
 	private final MarkingGraph mgraph;
 
 	private final PrintWriter bw;
 
 	private static String ln = "\n";
-	private static String genFormat = "\"%s\" [label=\"%s\n %s\"];" + ln;
-	private static String immFormat = "\"%s\" [label=\"%s\n %s\", style=filled];" + ln;
+	private static String genFormat = "\"%s\" [label=\"%d\n %s\"];" + ln;
+	private static String immFormat = "\"%s\" [label=\"%d\n %s\", style=filled];" + ln;
 	private static String arcFormat = "\"%s\" -> \"%s\" [label=\"%s\"];" + ln;
 
 	private static String genFormatG = "\"%s\" [label=\"%s\n(%d)\"];" + ln;
@@ -36,9 +34,9 @@ public class MarkWriter {
 	 * @param net An instance of Net
 	 * @param mgraph An instance of MarkingGraph
 	 */
-	public static void writeMark(Net net, MarkingGraph mgraph) {
+	public static void writeMark(MarkingGraph mgraph) {
 		PrintWriter bw = new PrintWriter(System.out, true);
-		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		MarkWriter pviz = new MarkWriter(mgraph, bw);
 		pviz.dotMark();
 	}
 	
@@ -49,10 +47,10 @@ public class MarkWriter {
 	 * @param mgraph An instance of MarkingGraph
 	 * @throws IOException An error on file IO
 	 */
-	public static void writeMark(String file, Net net, MarkingGraph mgraph) throws IOException {
+	public static void writeMark(String file, MarkingGraph mgraph) throws IOException {
 		BufferedWriter buf = Files.newBufferedWriter(Paths.get(file), StandardCharsets.UTF_8);
 		PrintWriter bw = new PrintWriter(buf, false);
-		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		MarkWriter pviz = new MarkWriter(mgraph, bw);
 		pviz.dotMark();
 		bw.close();
 	}
@@ -62,9 +60,9 @@ public class MarkWriter {
 	 * @param net An instance of Net
 	 * @param mgraph An instance of MarkingGraph
 	 */
-	public static void writeMarkGroup(Net net, MarkingGraph mgraph) {
+	public static void writeMarkGroup(MarkingGraph mgraph) {
 		PrintWriter bw = new PrintWriter(System.out, true);
-		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		MarkWriter pviz = new MarkWriter(mgraph, bw);
 		pviz.dotMarkGroup();
 	}
 
@@ -75,33 +73,35 @@ public class MarkWriter {
 	 * @param mgraph An instance of MarkingGraph
 	 * @throws IOException An error on file IO
 	 */
-	public static void writeMarkGroup(String file, Net net, MarkingGraph mgraph) throws IOException {
+	public static void writeMarkGroup(String file, MarkingGraph mgraph) throws IOException {
 		BufferedWriter buf = Files.newBufferedWriter(Paths.get(file), StandardCharsets.UTF_8);
 		PrintWriter bw = new PrintWriter(buf, false);
-		MarkWriter pviz = new MarkWriter(net, mgraph, bw);
+		MarkWriter pviz = new MarkWriter(mgraph, bw);
 		pviz.dotMarkGroup();
 		bw.close();
 	}
 
-	private MarkWriter(Net net, MarkingGraph mgraph, PrintWriter bw) {
-		this.net = net;
+	private MarkWriter(MarkingGraph mgraph, PrintWriter bw) {
+//		this.net = net;
 		this.mgraph = mgraph;
 		this.bw = bw;
 	}
 	
 	private void dotMark() {
 		bw.println("digraph { layout=dot; overlap=false; splines=true;");
-		for (Mark m : mgraph.getMark()) {
+		for (Map.Entry<Mark,Integer> entry : mgraph.getMarkIndex().entrySet()) {
+			Mark m = entry.getKey();
+			Integer i = entry.getValue();
 			GenVec g = mgraph.getGenVec(m);
 			switch (g.getType()) {
 			case IMM:
-				bw.printf(immFormat, m, makeLabel(m), makeLabel(g));
+				bw.printf(immFormat, m, i, makeLabel(g));
 				break;
 			case GEN:
-				bw.printf(genFormat, m, makeLabel(m), makeLabel(g));
+				bw.printf(genFormat, m, i, makeLabel(g));
 				break;
 			case ABS:
-				bw.printf(genFormat, m, makeLabel(m), makeLabel(g));
+				bw.printf(genFormat, m, i, makeLabel(g));
 				break;
 			default:
 			}
@@ -137,49 +137,11 @@ public class MarkWriter {
 		bw.println("}");
 	}
 
-	private String makeLabel(Mark m) {
-		return mgraph.getMarkIndex().get(m).toString();
-		// detal version
-//			String result = "";
-//			for (Place p : net.getPlaceSet()) {
-//				if (m.get(p.getIndex()) != 0) {
-//					if (result.equals("")) {
-//						result = p.getLabel() + ":" + m.get(p.getIndex());						
-//					} else {
-//						result = result + "," + p.getLabel() + ":" + m.get(p.getIndex());						
-//					}
-//				}
-//			}
-//			return result;
-		}
+//	private String makeLabel(Mark m) {
+//		return mgraph.getMarkIndex().get(m).toString();
+//	}
 
 	private String makeLabel(GenVec genv) {
 		return mgraph.getGenVecLabel().get(genv);
-//		String result = "(";
-//		for (GenTrans t: net.getGenTransSet()) {
-//			switch(genv.get(t.getIndex())) {
-//			case 0:
-//				break;
-//			case 1:
-//				if (!result.equals("(")) {
-//					result += " ";
-//				}
-//				result += t.getLabel() + "->enable";
-//				break;
-//			case 2:
-//				if (!result.equals("(")) {
-//					result += " ";
-//				}
-//				result += t.getLabel() + "->preemption";
-//				break;
-//			default:
-//				break;
-//			}
-//		}
-//		if (result.equals("(")) {
-//			result += "EXP";
-//		}
-//		result += ")";
-//		return result;
 	}
 }

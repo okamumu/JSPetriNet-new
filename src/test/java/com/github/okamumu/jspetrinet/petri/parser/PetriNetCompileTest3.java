@@ -55,7 +55,7 @@ public class PetriNetCompileTest3 {
 	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
@@ -88,7 +88,7 @@ public class PetriNetCompileTest3 {
 	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
@@ -122,7 +122,7 @@ public class PetriNetCompileTest3 {
 	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
 		} catch (JSPNException e) {
@@ -156,7 +156,7 @@ public class PetriNetCompileTest3 {
 	    	Net net = FactoryPN.compile(env);
 	    	PNWriter.write(net, env);
 			MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 			MatlabMatrixWriter.write("test2.mat", env, mat);
 			StateWriter.write(net, mg, mat);
@@ -189,7 +189,7 @@ public class PetriNetCompileTest3 {
     	Net net = FactoryPN.compile(env);
     	PNWriter.write(net, env);
 		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFStangible());
-		MarkWriter.writeMark(net, mg);
+		MarkWriter.writeMark(mg);
 		MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
 		MatlabMatrixWriter.write("test2.mat", env, mat);
 	}

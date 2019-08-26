@@ -70,8 +70,8 @@ public class PetriNetMarkingTest {
         	PNWriter.write(net, null);
         	int[] vec = {1,0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(net, mg);
-			MarkWriter.writeMarkGroup(net, mg);
+			MarkWriter.writeMark(mg);
+			MarkWriter.writeMarkGroup(mg);
 			bw.flush();
 			System.out.println(mg.getTotalState(GenVec.Type.IMM));
 			System.out.println(mg.getTotalState(GenVec.Type.GEN));
@@ -90,8 +90,8 @@ public class PetriNetMarkingTest {
         	PNWriter.write(net, null);
         	int[] vec = {1,0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(net, mg);
-			MarkWriter.writeMarkGroup(net, mg);
+			MarkWriter.writeMark(mg);
+			MarkWriter.writeMarkGroup(mg);
 			bw.flush();
 			System.out.println(mg.getTotalState(GenVec.Type.IMM));
 			System.out.println(mg.getTotalState(GenVec.Type.GEN));

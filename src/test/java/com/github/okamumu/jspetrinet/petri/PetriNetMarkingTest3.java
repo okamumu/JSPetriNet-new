@@ -115,7 +115,7 @@ public class PetriNetMarkingTest3 {
     		PrintWriter bw = new PrintWriter(System.out);
         	int[] vec = {0};
 			MarkingGraph mg = MarkingGraph.create(new Mark(vec), net, env, new DFS());
-			MarkWriter.writeMark(net, mg);
+			MarkWriter.writeMark(mg);
         	bw.flush();
 		} catch (JSPNException e) {
 			// TODO Auto-generated catch block

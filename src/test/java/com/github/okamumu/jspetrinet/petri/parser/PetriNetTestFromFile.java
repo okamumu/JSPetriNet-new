@@ -90,8 +90,8 @@ public class PetriNetTestFromFile {
 			System.out.println("Total ABS size " + mg.getTotalState(GenVec.Type.ABS));
 			System.out.println("Total ABS NNZ  " + mg.getTotalNNZ(GenVec.Type.ABS));
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
-			MarkWriter.writeMark(file + "_mark.dot", net, mg);
-			MarkWriter.writeMarkGroup(file + "_gmark.dot", net, mg);
+			MarkWriter.writeMark(file + "_mark.dot", mg);
+			MarkWriter.writeMarkGroup(file + "_gmark.dot", mg);
 			MatlabMatrixWriter.write(file + "_mat.mat", env, mat);
 			StateWriter.write(file + ".state", net, mg, mat);
 			out.println("dot -Tpdf -o " + file + "_mark.pdf " + file + "_mark.dot");
@@ -124,8 +124,8 @@ public class PetriNetTestFromFile {
 			System.out.println("Total ABS size " + mg.getTotalState(GenVec.Type.ABS));
 			System.out.println("Total ABS NNZ  " + mg.getTotalNNZ(GenVec.Type.ABS));
 			MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
-			MarkWriter.writeMark(file + "tan_mark.dot", net, mg);
-			MarkWriter.writeMarkGroup(file + "tan_gmark.dot", net, mg);
+			MarkWriter.writeMark(file + "tan_mark.dot", mg);
+			MarkWriter.writeMarkGroup(file + "tan_gmark.dot", mg);
 			MatlabMatrixWriter.write(file + "tan_mat.mat", env, mat);
 			StateWriter.write(file + "tan.state", net, mg, mat);
 			out.println("dot -Tpdf -o " + file + "tan_mark.pdf " + file + "tan_mark.dot");

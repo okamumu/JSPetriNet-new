@@ -2,7 +2,6 @@ package com.github.okamumu.jspetrinet.writer;
 
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.Logger;

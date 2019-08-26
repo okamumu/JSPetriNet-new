@@ -61,7 +61,7 @@ public class DFStangible implements CreateMarking {
 	private final Map<Mark,GenVec> markToGenVec;
 	private final List<Arc> arcList;
 
-	private final Logger logger;
+//	private final Logger logger;
 	private final PetriAnalysis analysis;
 	
 	public DFStangible() {
@@ -75,7 +75,7 @@ public class DFStangible implements CreateMarking {
 		markToGenVec = new HashMap<Mark,GenVec>();
 		arcList = new ArrayList<Arc>();
 
-		logger = LoggerFactory.getLogger(DFStangible.class);
+//		logger = LoggerFactory.getLogger(DFStangible.class);
 		analysis = PetriAnalysis.getInstance();
 	}
 	
@@ -152,7 +152,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Imm {}", m, genv);
+//		logger.debug("Add {} as Imm {}", m, genv);
 	}
 
 	/**
@@ -168,7 +168,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Gen {}", m, genv);
+//		logger.debug("Add {} as Gen {}", m, genv);
 	}
 
 	/**
@@ -184,7 +184,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Abs {}", m, genv);
+//		logger.debug("Add {} as Abs {}", m, genv);
 	}
 
 	/**
@@ -317,7 +317,7 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.debug("New visit {} (GenVec {}) in vanishing", m, vec);
+//			logger.debug("New visit {} (GenVec {}) in vanishing", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -345,7 +345,7 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.debug("New visit {} (GenVec {})", m, vec);
+//			logger.debug("New visit {} (GenVec {})", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {

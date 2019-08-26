@@ -39,7 +39,7 @@ public class DFS implements CreateMarking {
 	private final LinkedList<Mark> novisited;	
 	private final Map<GenVec,GenVec> genvecSet;
 
-	private final Logger logger;
+//	private final Logger logger;
 	private final PetriAnalysis analysis;
 
 	/**
@@ -49,7 +49,7 @@ public class DFS implements CreateMarking {
 		createdMarks = new HashMap<Mark,Mark>();
 		visited = new HashSet<Mark>();
 		novisited = new LinkedList<Mark>();
-		logger = LoggerFactory.getLogger(DFS.class);
+//		logger = LoggerFactory.getLogger(DFS.class);
 		analysis = PetriAnalysis.getInstance();
 		genvecSet = new HashMap<GenVec,GenVec>();
 	}
@@ -127,7 +127,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.debug("Add {} as Imm {}", m, genv);
+//		logger.debug("Add {} as Imm {}", m, genv);
 	}
 
 	/**
@@ -143,7 +143,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.debug("Add {} as Gen {}", m, genv);
+//		logger.debug("Add {} as Gen {}", m, genv);
 	}
 
 	/**
@@ -159,7 +159,7 @@ public class DFS implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markGraph.setGenVec(m, genv);
-		logger.debug("Add {} as Abs {}", m, genv);
+//		logger.debug("Add {} as Abs {}", m, genv);
 	}
 
 	/**
@@ -254,7 +254,7 @@ public class DFS implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.debug("New visit {} (GenVec {})", m, vec);
+//			logger.debug("New visit {} (GenVec {})", m, vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {

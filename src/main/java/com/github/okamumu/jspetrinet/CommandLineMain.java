@@ -16,7 +16,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.LoggerFactory;
 
-import com.github.okamumu.jspetrinet.ast.ASTEnv;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
 import com.github.okamumu.jspetrinet.exception.JSPNException;
@@ -37,7 +36,9 @@ import ch.qos.logback.classic.LoggerContext;
 public class CommandLineMain {
 	
 	public static void main(String[] args) {
-		// stop logback in the case of command line
+
+		// stop log: If the logger stops, logger.debug will be executed and makes it slow.
+		// In this version, all the loggers in making marks have been commented out.
 		LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 		loggerContext.stop();
 

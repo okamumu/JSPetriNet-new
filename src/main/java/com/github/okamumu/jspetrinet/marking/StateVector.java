@@ -12,6 +12,7 @@ import com.github.okamumu.jspetrinet.graph.Node;
 public class StateVector extends Node implements Comparable<StateVector> {
 
 	private final int[] vec;
+	private final int hash;
 
 	/**
 	 * Constructor
@@ -20,6 +21,7 @@ public class StateVector extends Node implements Comparable<StateVector> {
 
 	public StateVector(int[] vec) {
 		this.vec = vec;
+		this.hash = Arrays.hashCode(vec);
 	}
 
 	/**
@@ -43,7 +45,7 @@ public class StateVector extends Node implements Comparable<StateVector> {
 	
 	@Override
 	public int hashCode() {
-		return Arrays.hashCode(vec);
+		return hash;
 	}
 
 	@Override
