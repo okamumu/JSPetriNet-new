@@ -62,7 +62,7 @@ public class DFStangible implements CreateMarking {
 	private final Map<Mark,GenVec> markToGenVec;
 	private final List<Arc> arcList;
 
-	private final Logger logger;
+//	private final Logger logger;
 	private final PetriAnalysis analysis;
 	
 	public DFStangible() {
@@ -77,7 +77,7 @@ public class DFStangible implements CreateMarking {
 		markToGenVec = new HashMap<Mark,GenVec>();
 		arcList = new ArrayList<Arc>();
 
-		logger = LoggerFactory.getLogger(DFStangible.class);
+//		logger = LoggerFactory.getLogger(DFStangible.class);
 		analysis = PetriAnalysis.getInstance();
 	}
 	
@@ -112,6 +112,7 @@ public class DFStangible implements CreateMarking {
 			default:
 			}
 		}
+//		logger.debug("New visit {} (GenVec {}) in vanishing", m.copy(), vec);
 		return vec;
 	}
 	
@@ -154,7 +155,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Imm {}", m, genv);
+//		logger.debug("Add {} as Imm {}", m, genv);
 	}
 
 	/**
@@ -170,7 +171,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Gen {}", m, genv);
+//		logger.debug("Add {} as Gen {}", m, genv);
 	}
 
 	/**
@@ -186,7 +187,7 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-		logger.debug("Add {} as Abs {}", m, genv);
+//		logger.debug("Add {} as Abs {}", m, genv);
 	}
 
 	/**
@@ -323,7 +324,7 @@ public class DFStangible implements CreateMarking {
 			 * the explore another path.
 			 */
 			if (visitedIMM.contains(m)) {
-				logger.debug("Find a self-loop {} in vanishing", m.copy());
+//				logger.debug("Find a self-loop {} in vanishing", m.copy());
 				exitMarkSet.put(m, ExitMark.finalize(m));
 				Mark r = markPath.peek();
 				mergeExitSet(r, m);
@@ -332,7 +333,6 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.debug("New visit {} (GenVec {}) in vanishing", m.copy(), vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
@@ -360,7 +360,6 @@ public class DFStangible implements CreateMarking {
 
 			// new visit
 			int[] vec = createGenVec(m, net, env);
-			logger.debug("New visit {} (GenVec {})", m.copy(), vec);
 
 			List<Trans> enabledIMMList = createEnabledIMM(m, net, env);
 			if (enabledIMMList.size() > 0) {
