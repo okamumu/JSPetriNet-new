@@ -112,7 +112,7 @@ public class DFStangible implements CreateMarking {
 			default:
 			}
 		}
-//		logger.debug("New visit {} (GenVec {}) in vanishing", m.copy(), vec);
+//		logger.debug("New visit {} (GenVec {})", m.copy(), vec);
 		return vec;
 	}
 	
@@ -155,7 +155,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-//		logger.debug("Add {} as Imm {}", m, genv);
+		exitMarkSet.put(m, ExitMark.init(m, genv));
+//		logger.debug("Add {} as Imm {}", m.copy(), genv);
 	}
 
 	/**
@@ -171,7 +172,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-//		logger.debug("Add {} as Gen {}", m, genv);
+		exitMarkSet.put(m, ExitMark.finalize(m, genv));
+//		logger.debug("Add {} as Gen {}", m.copy(), genv);
 	}
 
 	/**
@@ -187,7 +189,8 @@ public class DFStangible implements CreateMarking {
 			genvecSet.put(genv, genv);
 		}
 		markToGenVec.put(m, genv);
-//		logger.debug("Add {} as Abs {}", m, genv);
+		exitMarkSet.put(m, ExitMark.finalize(m, genv));
+//		logger.debug("Add {} as Abs {}", m.copy(), genv);
 	}
 
 	/**
@@ -226,7 +229,6 @@ public class DFStangible implements CreateMarking {
 			connectTo(m, dest, tr);
 		}
 		visitedIMM.add(m);
-		exitMarkSet.put(m, ExitMark.init(m));
 	}
 	
 	/**
@@ -263,7 +265,6 @@ public class DFStangible implements CreateMarking {
 			}
 		}
 		visited.add(m);
-		exitMarkSet.put(m, ExitMark.finalize(m));
 		return noenabled;
 	}
 
@@ -287,7 +288,7 @@ public class DFStangible implements CreateMarking {
 	private void mergeExitSet(Mark parent, Mark child) throws MarkingError {
 		ExitMark em = exitMarkSet.get(parent);
 		ExitMark eo = exitMarkSet.get(child);
-		exitMarkSet.put(parent, ExitMark.union(markToGenVec, em, eo));
+		em.union(eo);
 	}
 
 	private void vanishing(Net net, ASTEnv env) throws JSPNException {
@@ -325,7 +326,7 @@ public class DFStangible implements CreateMarking {
 			 */
 			if (visitedIMM.contains(m)) {
 //				logger.debug("Find a self-loop {} in vanishing", m.copy());
-				exitMarkSet.put(m, ExitMark.finalize(m));
+				exitMarkSet.get(m).setNonVanishable();
 				Mark r = markPath.peek();
 				mergeExitSet(r, m);
 				continue;

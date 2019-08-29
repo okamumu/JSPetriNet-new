@@ -1,9 +1,5 @@
 package com.github.okamumu.jspetrinet.marking;
 
-import java.util.Map;
-
-import com.github.okamumu.jspetrinet.exception.MarkingError;
-
 /**
  * A class to represent the status of exit marks
  * that are marks as next marks when IMM transitions are vanished.
@@ -28,72 +24,39 @@ public final class ExitMark {
 	/**
 	 * The static method to construct an exit mark as Init
 	 * @param m A next mark
+	 * @param genv An instance of GenVec
 	 */
-	public static ExitMark init(Mark m) {
-		return new ExitMark(m, StatusOfExitMarks.Init);
+	public static ExitMark init(Mark m, GenVec genv) {
+		ExitMark em = new ExitMark(m, genv);
+		em.status = StatusOfExitMarks.Init;
+		return em;
 	}
 	
 	/**
 	 * The static method to construct an exit mark as NoVanishable
 	 * @param m A next mark.
+	 * @param genv An instance of GenVec
 	 */
-	public static ExitMark finalize(Mark m) {
-		return new ExitMark(m, StatusOfExitMarks.NoVanishable);
+	public static ExitMark finalize(Mark m, GenVec genv) {
+		ExitMark em = new ExitMark(m, genv);
+		em.status = StatusOfExitMarks.NoVanishable;
+		return em;
 	}
 
-	/**
-	 * The static method to construct by merging makrs of parent and child.
-	 * @param mg An instance of marking graph. This is used to get the GenVec that the mark belongs to
-	 * @param parent A mark for parent
-	 * @param child A mark for child
-	 * @return An instance of new status for the parent mark
-	 * @throws MarkingError An error when the status of child mark is Init
-	 */
-	public static ExitMark union(Map<Mark,GenVec> mg, ExitMark parent, ExitMark child) throws MarkingError {
-		switch (parent.status) {
-		case Init:
-			switch (child.status) {
-			case Init:
-				return new ExitMark(child.emark, StatusOfExitMarks.Vanishable);
-			case Vanishable:
-			case NoVanishable:
-				GenVec s1 = mg.get(parent.emark);
-				GenVec s2 = mg.get(child.emark);
-				if (s1.isSameClass(s2)) {
-					return new ExitMark(child.emark, StatusOfExitMarks.Vanishable);
-				} else {
-					return new ExitMark(parent.emark, StatusOfExitMarks.NoVanishable);
-				}
-			}
-		case Vanishable:
-			switch (child.status) {
-			case Init:
-				throw new  MarkingError("ExitMarking1: The status of child is Init");
-			case Vanishable:
-			case NoVanishable:
-				if (parent.emark == child.emark) {
-					return parent;
-				} else {
-					return new ExitMark(parent.emark, StatusOfExitMarks.NoVanishable);
-				}
-			}
-		case NoVanishable:
-			return parent;
-		}
-		throw new MarkingError("A general error in ExitMarking");
-	}
-
-	private final Mark emark;
-	private final StatusOfExitMarks status;
+	private final Mark self;
+	private final GenVec genv;
+	private Mark next;
+	private StatusOfExitMarks status;
 	
 	/**
 	 * Constructor
-	 * @param emark An instance of mark
+	 * @param m An instance of mark
 	 * @param status A status of exit mark
 	 */
-	private ExitMark(Mark emark, StatusOfExitMarks status) {
-		this.emark = emark;
-		this.status = status;
+	private ExitMark(Mark m, GenVec genv) {
+		this.self = m;
+		this.genv = genv;
+		this.next = m;
 	}
 
 	/**
@@ -101,7 +64,7 @@ public final class ExitMark {
 	 * @return An instance of next mark
 	 */
 	public final Mark get() {
-		return emark;
+		return next;
 	}
 	
 	/**
@@ -112,5 +75,53 @@ public final class ExitMark {
 		return status == StatusOfExitMarks.Vanishable;
 	}
 	
+	/**
+	 * Set NonVanishable
+	 */
+	public void setNonVanishable() {
+		next = self;
+		status = StatusOfExitMarks.NoVanishable;		
+	}
+
+	/**
+	 * The method to construct by merging marks of parent and child.
+	 * @param child A mark for child
+	 */
+	public void union(ExitMark child) {
+		switch (status) {
+		case Init:
+			switch (child.status) {
+//			case Init:
+//				throw new  MarkingError("ExitMarking0: The status of child is Init");
+			case Vanishable:
+			case NoVanishable:
+				if (genv.isSameClass(child.genv)) {
+					next = child.next;
+					status = StatusOfExitMarks.Vanishable;
+					return;
+				} else {
+					next = self;
+					status = StatusOfExitMarks.NoVanishable;
+					return;
+				}
+			default:
+			}
+		case Vanishable:
+			switch (child.status) {
+//			case Init:
+//				throw new  MarkingError("ExitMarking1: The status of child is Init");
+			case Vanishable:
+			case NoVanishable:
+				if (next != child.next) {
+					next = self;
+					status = StatusOfExitMarks.NoVanishable;
+				}
+			default:
+			}
+		case NoVanishable:
+			return;
+		}
+//		throw new MarkingError("A general error in ExitMarking");
+	}
 }
 
