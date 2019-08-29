@@ -19,6 +19,7 @@ import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetTest {
 	
 	Net net;

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.okamumu.jspetrinet.ast.AST;
 import com.github.okamumu.jspetrinet.ast.values.ASTValue;
 import com.github.okamumu.jspetrinet.exception.ASTException;
 import com.github.okamumu.jspetrinet.exception.InvalidDefinition;
@@ -18,6 +17,7 @@ import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetCompileTest {
 	
 	Env env;

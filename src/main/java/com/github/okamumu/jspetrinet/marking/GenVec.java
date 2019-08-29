@@ -2,10 +2,6 @@ package com.github.okamumu.jspetrinet.marking;
 
 import java.util.Objects;
 
-import com.github.okamumu.jspetrinet.graph.Node;
-import com.github.okamumu.jspetrinet.petri.Net;
-import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
-
 /**
  * A class for state vector of general transitions
  *

@@ -41,6 +41,7 @@ import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.writer.StateWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetTestSPNP {
 
 	public static String getString(Net net, GenVec g) {

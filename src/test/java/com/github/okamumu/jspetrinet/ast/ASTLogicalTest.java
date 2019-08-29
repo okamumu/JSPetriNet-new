@@ -28,6 +28,7 @@ public class ASTLogicalTest {
 		assertEquals(true && false, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void test3() throws ASTException {
 		AST a1 = ASTValue.getAST(1);
@@ -36,6 +37,7 @@ public class ASTLogicalTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void test4() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -45,6 +47,7 @@ public class ASTLogicalTest {
 		assertEquals(true || true, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test
 	public void test5() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -63,6 +66,7 @@ public class ASTLogicalTest {
 		assertEquals(false || false, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void test6() throws ASTException {
 		AST a1 = ASTValue.getAST(1);
@@ -71,6 +75,7 @@ public class ASTLogicalTest {
 		Object result = a3.eval(null);
 	}
 	
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperator.class)
 	public void testInvalidOp() throws ASTException {
 		AST a1 = ASTValue.getAST(1);

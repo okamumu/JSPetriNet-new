@@ -14,6 +14,7 @@ import com.github.okamumu.jspetrinet.petri.*;
 import com.github.okamumu.jspetrinet.petri.nodes.*;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetEnvTest {
 	
 	Net net;

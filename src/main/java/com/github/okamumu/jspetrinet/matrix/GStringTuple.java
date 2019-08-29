@@ -3,7 +3,6 @@ package com.github.okamumu.jspetrinet.matrix;
 import java.util.Objects;
 
 import com.github.okamumu.jspetrinet.marking.GenVec;
-import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
 
 public class GStringTuple {
 

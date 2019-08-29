@@ -64,6 +64,7 @@ public class ASTComparatorGteTest {
 		assertEquals(1>=2, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testGteIntBooleanBoolean() throws ASTException {
 		AST a1 = ASTValue.getAST(true);

@@ -5,6 +5,7 @@ package com.github.okamumu.jspetrinet.exception;
  *
  */
 
+@SuppressWarnings("serial")
 public class UnknownOption extends ASTException {
 
 	/**

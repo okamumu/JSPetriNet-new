@@ -6,6 +6,7 @@ package com.github.okamumu.jspetrinet.exception;
  *
  */
 
+@SuppressWarnings("serial")
 public class JSPNException extends Exception {
 
 	/**

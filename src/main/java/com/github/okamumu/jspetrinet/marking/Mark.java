@@ -1,6 +1,5 @@
 package com.github.okamumu.jspetrinet.marking;
 
-import com.github.okamumu.jspetrinet.graph.Node;
 import com.github.okamumu.jspetrinet.petri.nodes.Trans;
 
 /**

@@ -1,17 +1,15 @@
-package com.github.okamumu.jspetrinet.marking.method;
+package com.github.okamumu.jspetrinet.marking;
 
 import java.util.Map;
 
 import com.github.okamumu.jspetrinet.exception.MarkingError;
-import com.github.okamumu.jspetrinet.marking.GenVec;
-import com.github.okamumu.jspetrinet.marking.Mark;
 
 /**
  * A class to represent the status of exit marks
  * that are marks as next marks when IMM transitions are vanished.
  *
  */
-class ExitMark {
+public final class ExitMark {
 	
 	/**
 	 * An enum to represent the status. The status is temporally decided.
@@ -24,7 +22,7 @@ class ExitMark {
 	enum StatusOfExitMarks {
 		Init,
 		Vanishable,
-		NoVanishable,		
+		NoVanishable,
 	}
 
 	/**
@@ -56,7 +54,7 @@ class ExitMark {
 		case Init:
 			switch (child.status) {
 			case Init:
-				throw new  MarkingError("ExitMarking: The status of child is Init");
+				return new ExitMark(child.emark, StatusOfExitMarks.Vanishable);
 			case Vanishable:
 			case NoVanishable:
 				GenVec s1 = mg.get(parent.emark);
@@ -70,7 +68,7 @@ class ExitMark {
 		case Vanishable:
 			switch (child.status) {
 			case Init:
-				throw new  MarkingError("ExitMarking: The status of child is Init");
+				throw new  MarkingError("ExitMarking1: The status of child is Init");
 			case Vanishable:
 			case NoVanishable:
 				if (parent.emark == child.emark) {

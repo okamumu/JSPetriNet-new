@@ -70,6 +70,7 @@ public class ASTPowFuncTest {
 		assertEquals(Math.pow(2, 2), result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testFunc2() throws ASTException {
 		AST a1 = ASTValue.getAST(2);

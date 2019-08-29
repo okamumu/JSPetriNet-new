@@ -42,6 +42,7 @@ import com.github.okamumu.jspetrinet.petri.arcs.*;
 import com.github.okamumu.jspetrinet.petri.ast.ASTEnableCond;
 import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
+@SuppressWarnings("unused")
 public class PetriNetMarkingTest3 {
 	
 	Net net;

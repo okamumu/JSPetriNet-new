@@ -64,6 +64,7 @@ public class ASTComparatorNeqTest {
 		assertEquals(false, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testNeqEx1() throws ASTException {
 		AST a1 = ASTValue.getAST(true);

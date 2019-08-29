@@ -46,6 +46,7 @@ public class ASTArithmeticOperatorTest {
 		assertEquals("1+2", 3.0, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testPlusBooleanDouble() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -135,6 +136,7 @@ public class ASTArithmeticOperatorTest {
 		assertEquals("5*2", 10.0, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testMultiEx() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -179,6 +181,7 @@ public class ASTArithmeticOperatorTest {
 		assertEquals("5/2", 5.0/2.0, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testDivideEx1() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -187,6 +190,7 @@ public class ASTArithmeticOperatorTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testDivideEx2() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -195,6 +199,7 @@ public class ASTArithmeticOperatorTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testDivideEx3() throws ASTException {
 		AST a1 = ASTValue.getAST(5);
@@ -257,6 +262,7 @@ public class ASTArithmeticOperatorTest {
 		assertEquals("5/2", 5/2, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testIDivideEx1() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -265,6 +271,7 @@ public class ASTArithmeticOperatorTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testIDivideEx2() throws ASTException {
 		AST a1 = ASTValue.getAST(true);
@@ -273,6 +280,7 @@ public class ASTArithmeticOperatorTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testIDivideEx3() throws ASTException {
 		AST a1 = ASTValue.getAST(5.5);
@@ -308,6 +316,7 @@ public class ASTArithmeticOperatorTest {
 		assertEquals("5%2", 5 % 2, result);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperation.class)
 	public void testMod2() throws ASTException {
 		AST a1 = ASTValue.getAST(5.0);
@@ -316,6 +325,7 @@ public class ASTArithmeticOperatorTest {
 		Object result = a3.eval(null);
 	}
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperator.class)
 	public void testEval1() throws ASTException {
 		AST a1 = ASTValue.getAST(5.0);

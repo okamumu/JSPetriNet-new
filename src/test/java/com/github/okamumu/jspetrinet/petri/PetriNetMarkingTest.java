@@ -24,6 +24,7 @@ import com.github.okamumu.jspetrinet.writer.MarkWriter;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetMarkingTest {
 	
 	Net net;

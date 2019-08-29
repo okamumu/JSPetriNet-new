@@ -39,6 +39,7 @@ import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.writer.StateWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 
+@SuppressWarnings("unused")
 public class PetriNetTestFromFile {
 
 	static PrintWriter out;
@@ -68,9 +69,6 @@ public class PetriNetTestFromFile {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (ASTException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JSPNException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

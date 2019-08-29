@@ -30,6 +30,7 @@ import com.github.okamumu.jspetrinet.writer.PNWriter;
 import com.github.okamumu.jspetrinet.petri.arcs.*;
 import com.github.okamumu.jspetrinet.petri.ast.ASTNToken;
 
+@SuppressWarnings("unused")
 public class PetriNetMarkingTest2 {
 	
 	Net net;

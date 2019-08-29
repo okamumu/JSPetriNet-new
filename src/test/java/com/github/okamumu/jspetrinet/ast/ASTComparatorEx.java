@@ -10,6 +10,7 @@ import com.github.okamumu.jspetrinet.exception.*;
 
 public class ASTComparatorEx {
 
+	@SuppressWarnings("unused")
 	@Test(expected = InvalidOperator.class)
 	public void testInvalidOp() throws ASTException {
 		AST a1 = ASTValue.getAST(1);

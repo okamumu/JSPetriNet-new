@@ -5,6 +5,7 @@ package com.github.okamumu.jspetrinet.exception;
  *
  */
 
+@SuppressWarnings("serial")
 public class InvalidDefinition extends JSPNException {
 
 	public InvalidDefinition(String msg) {

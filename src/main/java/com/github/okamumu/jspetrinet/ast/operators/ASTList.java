@@ -11,6 +11,7 @@ import com.github.okamumu.jspetrinet.exception.ASTException;
  *
  */
 
+@SuppressWarnings("serial")
 public class ASTList extends ArrayList<AST> implements AST {
 
 	public ASTList() {}
