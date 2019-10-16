@@ -238,11 +238,11 @@ public class MarkingMatrix {
 			int isize = mp.getGenVecSize(gtuple.getSrc());
 			int jsize = mp.getGenVecSize(gtuple.getDest());
 			matrixSet.put(gtuple, new ASTMatrix(isize, jsize));
-			GTuple gdiag = new GTuple(gtuple.getSrc(), gtuple.getSrc(), gtuple.getGenTrans());
-			if (!matrixSet.containsKey(gdiag)) {
-				matrixSet.put(gdiag, new ASTMatrix(isize, isize));
-//				matrixSet.get(gdiag).add(0, 0, ASTValue.getAST(0));
-			}
+//			GTuple gdiag = new GTuple(gtuple.getSrc(), gtuple.getSrc(), gtuple.getGenTrans());
+//			if (!matrixSet.containsKey(gdiag)) {
+//				matrixSet.put(gdiag, new ASTMatrix(isize, isize));
+////				matrixSet.get(gdiag).add(0, 0, ASTValue.getAST(0));
+//			}
 		}
 		return matrixSet.get(gtuple);
 	}
@@ -287,8 +287,8 @@ public class MarkingMatrix {
 	 */
 	private void createRewardVector(Net net, ASTEnv env, MarkingGraph mp) throws ASTException {
 		for (GenVec genv : mp.getGenVec()) {
-			ASTVector vec = new ASTVector(mp.getGenVecSize(genv));
 			for (String label : net.getRewardSet()) {
+				ASTVector vec = new ASTVector(mp.getGenVecSize(genv));
 				for (Mark m : mp.getMarkSet().get(genv)) {
 					AST f = (AST) env.get(label);
 					vec.set(mp.getMarkIndex().get(m), ASTValue.getAST(analysis.astEval(f, m, env)));

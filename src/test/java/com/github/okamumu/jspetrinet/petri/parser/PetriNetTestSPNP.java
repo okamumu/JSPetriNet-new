@@ -326,4 +326,24 @@ public class PetriNetTestSPNP {
 			assertEquals("NNZ" + getString(net,g), Integer.valueOf(nnz[i]), mg.getGenVecNNZ(g));
 		}
 	}
+
+	@Test
+	public void testBitcoin3() throws IOException, JSPNException {
+    	String file = "example/bitcoin3";
+    	Env env = new Env();
+    	NetBuilder.buildFromFile(file + ".spn", env);
+    	Net net = FactoryPN.compile(env);
+		long start = System.nanoTime();
+		MarkingGraph mg = MarkingGraph.create(net.getInitMark(), net, env, new DFS());
+		double ctime = (System.nanoTime() - start) / 1000000000.0;
+		assertTrue(ctime < 300);
+		assertEquals("IMMsize", 9920, mg.getTotalState(GenVec.Type.IMM));
+		assertEquals("GENsize", 164175, mg.getTotalState(GenVec.Type.GEN));
+		assertEquals("ABSsize", 1, mg.getTotalState(GenVec.Type.ABS));
+		assertEquals("IMM NNZ", 9920, mg.getTotalNNZ(GenVec.Type.IMM));
+		assertEquals("GEN NNZ", 624960, mg.getTotalNNZ(GenVec.Type.GEN));
+		assertEquals("ABS NNZ", 0, mg.getTotalNNZ(GenVec.Type.ABS));
+		MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+		MatlabMatrixWriter.write("test2.mat", env, mat);
+	}
 }

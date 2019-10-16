@@ -29,6 +29,8 @@ import com.github.okamumu.jspetrinet.petri.FactoryPN;
 import com.github.okamumu.jspetrinet.petri.Net;
 import com.github.okamumu.jspetrinet.petri.NetBuilder;
 import com.github.okamumu.jspetrinet.petri.nodes.GenTrans;
+import com.github.okamumu.jspetrinet.writer.MarkWriter;
+import com.github.okamumu.jspetrinet.writer.MatlabMatrixWriter;
 import com.github.okamumu.jspetrinet.writer.PNWriter;
 
 import ch.qos.logback.classic.LoggerContext;
@@ -228,7 +230,21 @@ public class CommandLineMain {
 
 		System.out.println(markingToString(net, mg));
 
-//		MarkingMatrix mat = MarkingMatrix.create(net, env, mg, 0);
+		MarkingMatrix mat;
+		try {
+			mat = MarkingMatrix.create(net, env, mg, 0);
+			if (cmd.hasOption("o")) {
+				MatlabMatrixWriter.write(cmd.getOptionValue("o") + ".mat", env, mat);
+			}
+		} catch (ASTException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+//		MarkWriter.writeMark(file + "_mark.dot", mg);
+//		MarkWriter.writeMarkGroup(file + "_gmark.dot", mg);
+//		MatlabMatrixWriter.write(file + "_mat.mat", env, mat);
 
 	}
 
