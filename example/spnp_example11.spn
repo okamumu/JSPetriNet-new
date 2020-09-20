@@ -1,0 +1,139 @@
+/*
+  SPNP Example 11: MMPP Model for the BUS in ATM LAN emulation
+  (H. Sun, X. Zang and K.S. Trivedi,
+   Performance of broadcast and unknown server (BUS) in ATM LAN emulation,
+   Technical Report, Duke University, 1999)
+*/
+
+PLST = 2   // Short packet size
+PLMD = 4   // Medium packet size
+PLLG = 32  // Long packet size
+
+c1 = 0.342
+c2 = 0.093
+c3 = 0.565
+
+rateOUT = 5000
+
+K = 3
+lambda = 0.9
+mu = 1
+beta = 1.1
+
+BN = 40  // Buffer size
+// QLEN = 0
+
+g0 = 0.01
+g1 = 0.05
+d01 = 0.5
+d10 = 0.5
+a0 = 0.01
+a1 = 0.05
+b01 = 0.5
+b10 = 0.5
+
+m1 = (b01 * a1 + b10 * a0) / (b01 + b10)
+v1 = (a1 - a0) * (a1 - a0) * b01 * b10 / ((b01 + b10) * (b01 + b10))
+u1 = (a1 * a1 * a1 * b01 + a0 * a0 * a0 * b10) / (b01 + b10)
+u1 = u1 - 3 * m1 * v1 - m1 * m1 * m1
+t1 = 1 / (b01 + b10)
+
+m2 = (d01 * g1 + d10 * g0) / (d01 + d10)
+v2 = (g1 - g0) * (g1 - g0) * d01 * d10 / ((d01 + d10) * (d01 + d10))
+u2 = (g1 * g1 * g1 * d01 + g0 * g0 * g0 * d10) / (d01 + d10)
+u2 = u2 - 3 * m2 * v2 - m2 * m2 * m2
+t2 = 1 / (d01 + d10)
+
+place PAR
+place PCS
+place POUT
+
+place PARV
+place PST
+place PMD
+place PLG
+place PBUF
+place PEOUT
+place PAON
+
+exp TARV (rate = lambda, guard = guardARV)
+exp TAR (rate = mu)
+exp TCS (rate = beta)
+imm tOUT (priority = 20, weight = 1)
+
+exp TARV2 (rate = rateARV2, guard = guardARV2)
+imm tST (priority = 20, weight = c1)
+imm tMD (priority = 20, weight = c2)
+imm tLG (priority = 20, weight = c3)
+imm tBST (priority = 40, weight = 1, guard = guardBST)
+imm tBMD (priority = 40, weight = 1, guard = guardBMD)
+imm tBLG (priority = 40, weight = 1, guard = guardBLG)
+imm tLST (priority = 20, weight = 1)
+imm tLMD (priority = 20, weight = 1)
+imm tLLG (priority = 20, weight = 1)
+imm tEOUT (priority = 20, weight = 1)
+exp TOUT (rate = rateOUT)
+exp TT01 (rate = t01)
+exp TT10 (rate = t10)
+
+oarc TARV to PAR
+iarc PAR to TAR
+oarc TAR to PCS
+iarc PCS to tOUT
+oarc tOUT to POUT (multi = 3)
+iarc POUT to TCS
+harc POUT to tOUT
+
+oarc TARV2 to PARV
+iarc PARV to tST
+iarc PARV to tMD
+iarc PARV to tLG
+oarc tST to PST
+oarc tMD to PMD
+oarc tLG to PLG
+iarc PST to tBST
+iarc PST to tLST
+iarc PMD to tBMD
+iarc PMD to tLMD
+iarc PLG to tBLG
+iarc PLG to tLLG
+oarc tBST to PBUF (multi = PLST)
+oarc tBLG to PBUF (multi = PLLG)
+oarc tBMD to PBUF (multi = PLMD)
+iarc PBUF to tEOUT
+oarc tEOUT to PEOUT (multi = 3)
+iarc PEOUT to TOUT
+harc PEOUT to tEOUT
+oarc TT01 to PAON
+iarc PAON to TT10
+harc PAON to TT01
+
+// REWARD Functions
+QL = ifelse(#PBUF > QLEN, 1, 0)
+MLP = ifelse(#PBUF > BN - PLMD && ?TARV2, 1, 0)
+SLP = ifelse(#PBUF > BN - PLST && ?TARV2, 1, 0)
+LLP = ifelse(#PBUF > BN - PLLG && ?TARV2, 1, 0)
+
+// GUARD Functions
+n = ifelse(#POUT > 0, 1, 0)
+guardARV = #PAR + #PCS + n < K
+guardARV2 = rateAL != 0 || #PAON > 0
+guardBST = #PBUF <= BN - PLST
+guardBMD = #PBUF <= BN - PLMD
+guardBLG = #PBUF <= BN - PLLG
+
+// RATE Functions
+S = ifelse(#POUT > 0, 1, 0)
+S = S + #PAR + #PCS
+m = S * m1 + m2
+v = S * v1 + v2
+u = S * u1 + u2
+t = (S * v1 * t1 + v2 * t2) / v
+x = u / sqrt(v * v * v)
+e = (x * x + 2 - x * sqrt(4 + x * x)) / 2
+rateAH = m + sqrt(v / e)
+rateAL = m - sqrt(v * e)
+
+rateARV2 = ifelse(#PAON > 0, rateAH, rateAL)
+t01 = 1 / (t * (1 + e))
+t10 = e / (t * (1 + e))

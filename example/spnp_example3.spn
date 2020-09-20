@@ -1,0 +1,30 @@
+/*
+  SPNP Example 3: M/M/m/b queue
+*/
+
+place buf
+
+exp trin (rate = lambda)
+exp trserv (rate = rate.serv)
+
+oarc trin to buf
+harc buf to trin (multi = b)
+iarc buf to trserv
+
+rate.serv = ifelse(#buf < m, #buf*mu, m*mu)
+
+qlength = #buf
+util = ifelse(?trserv, 1, 0)
+tput = ifelse(?trserv, trserv.rate, 0)
+probrej = ifelse(#buf == b, 1, 0)
+probempty = ifelse(#buf == 0, 1, 0)
+probhalffull = ifelse(#buf == b div 2, 1, 0)
+
+// buffer size
+b = 50
+
+// # of servers
+m = 10
+
+lambda = 0.1
+mu = 1.0

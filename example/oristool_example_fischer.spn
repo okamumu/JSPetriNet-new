@@ -1,0 +1,131 @@
+/*
+  ORIS Tool Example: Fischer's protocol
+  Fischer's mutual exclusion protocol with three processes.
+*/
+
+place id
+
+// net 1
+
+place idle1 (init = 1)
+place ready1
+place writing1
+place waiting1
+place reading1
+place cs1
+place completed1
+
+exp arrival1
+imm readEmpty1 (guard = #id == 0)
+gen write1 { #id = 1 }
+gen wait1
+imm readOther1 (guard = #id != 1)
+imm readSelf1 (guard = #id == 1)
+gen service1
+imm reset1 { #id = 0 }
+
+arc idle1 to arrival1
+arc arrival1 to ready1
+arc readOther1 to ready1
+arc ready1 to readEmpty1
+arc readEmpty1 to writing1
+arc writing1 to write1
+arc write1 to waiting1
+arc waiting1 to wait1
+arc wait1 to reading1
+arc reading1 to readSelf1
+arc reading1 to readOther1
+arc readSelf1 to cs1
+arc cs1 to service1
+arc service1 to completed1
+arc completed1 to reset1
+arc reset1 to idle1
+
+// net 2
+
+place idle2 (init = 1)
+place ready2
+place writing2
+place waiting2
+place reading2
+place cs2
+place completed2
+
+exp arrival2
+imm readEmpty2 (guard = #id == 0)
+gen write2 { #id = 2 }
+gen wait2
+imm readOther2 (guard = #id != 2)
+imm readSelf2 (guard = #id == 2)
+gen service2
+imm reset2 { #id = 0 }
+
+arc idle2 to arrival2
+arc arrival2 to ready2
+arc readOther2 to ready2
+arc ready2 to readEmpty2
+arc readEmpty2 to writing2
+arc writing2 to write2
+arc write2 to waiting2
+arc waiting2 to wait2
+arc wait2 to reading2
+arc reading2 to readSelf2
+arc reading2 to readOther2
+arc readSelf2 to cs2
+arc cs2 to service2
+arc service2 to completed2
+arc completed2 to reset2
+arc reset2 to idle2
+
+// net 3
+
+place idle3 (init = 1)
+place ready3
+place writing3
+place waiting3
+place reading3
+place cs3
+place completed3
+
+exp arrival3
+imm readEmpty3 (guard = #id == 0)
+gen write3 { #id = 3 }
+gen wait3
+imm readOther3 (guard = #id != 3)
+imm readSelf3 (guard = #id == 3)
+gen service3
+imm reset3 { #id = 0 }
+
+arc idle3 to arrival3
+arc arrival3 to ready3
+arc readOther3 to ready3
+arc ready3 to readEmpty3
+arc readEmpty3 to writing3
+arc writing3 to write3
+arc write3 to waiting3
+arc waiting3 to wait3
+arc wait3 to reading3
+arc reading3 to readSelf3
+arc reading3 to readOther3
+arc readSelf3 to cs3
+arc cs3 to service3
+arc service3 to completed3
+arc completed3 to reset3
+arc reset3 to idle3
+
+// parameters
+
+arrival1.rate = 0.1
+write1.dist = unif(0,1)
+wait1.dist = det(1)
+service1.dist = unif(0,2)
+
+arrival2.rate = 0.1
+write2.dist = unif(0,1)
+wait2.dist = det(1)
+service2.dist = unif(0,2)
+
+arrival3.rate = 0.1
+write3.dist = unif(0,1)
+wait3.dist = det(1)
+service3.dist = unif(0,2)

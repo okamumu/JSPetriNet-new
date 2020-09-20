@@ -1,0 +1,53 @@
+/*
+  Example: RAID6
+  F. Machida, R. Xia and K.S. Trivedi,
+  Performability modeling for RAID storage systems by Markov regenerative process,
+  IEEE Transactions on Dependable and Secure Computing
+*/
+
+// HDD model
+
+place Pn (init = 6)
+place Pdf
+exp Tdfail (guard = gfail, rate = Tdfail_rate)
+gen Trebuild (guard = gfail)
+imm Tinit (guard = ginit)
+arc Pn to Tdfail
+arc Tdfail to Pdf
+arc Pdf to Trebuild
+arc Pdf to Tinit
+arc Trebuild to Pn
+arc Tinit to Pn
+
+// Reconstruction model
+
+place Po (init = 1)
+place Pr
+place Pc
+imm Tstart (guard = gstart)
+gen Trecon
+imm Tend (guard = gend)
+arc Po to Tstart
+arc Tstart to Pr
+arc Pr to Trecon
+arc Trecon to Pc
+arc Pc to Tend
+arc Tend to Po
+
+// rate and gurads
+
+Tdfail_rate = #Pn * lambda
+gfail = #Po == 1
+gstart = #Pdf > 2
+ginit = #Pc == 1
+gend = #Pdf == 0
+
+// params
+
+Trebuild.dist = det(MTTR1)
+Trecon.dist = det(MTTR2)
+
+MTTF = 1.0e+6 // [hours]
+lambda = 1/MTTF
+MTTR1 = 2 // [hours]
+MTTR2 = 24 // [hours]

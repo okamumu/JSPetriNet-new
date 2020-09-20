@@ -1,0 +1,102 @@
+/*
+  SPNP Example 6: ATM network under overload
+  (C.-Y. Wang, D. Logothetis, K.S. Trivedi and I. Viniotis,
+   Transient behavior of ATM networks under overloads,
+   Proc. IEEE INFOCOM 96, 978-985, 1996)
+*/
+
+a1 = 0.0269163
+a2 = 0.0269163
+b1 = 0.00672908
+b2 = 0.00672908
+
+lambda11 = 1.5058
+lambda21 = 1.5058
+
+lambda12 = 0.00301161
+lambda22 = 0.00301161
+
+r1 = 5
+r2 = 5
+
+mu1 = 2.73
+mu2 = 2.73
+
+K1 = 16
+K2 = 16
+
+e = 0.0001
+
+place mmpp_1 (init = 1)
+place mmpp_2 (init = 1)
+place buf1
+place Er_token1
+place Er_stage1
+place buf2
+place Er_token2
+place Er_stage2
+
+exp t2_1 (rate = b1)
+exp t2_2 (rate = b2)
+exp t1_1 (rate = a1)
+exp t1_2 (rate = a2)
+exp tar1 (rate = Rar1, guard = gar1)
+imm Er_in1 (priority = 20, weight = 1)
+exp Er_trans1 (rate = REr1)
+imm Er_out1 (priority = 20, weight = 1)
+exp tar2 (rate = Rar2, guard = gar2)
+imm Er_in2 (priority = 20, weight = 1)
+exp Er_trans2 (rate = REr2)
+imm Er_out2 (priority = 20, weight = 1)
+
+oarc t2_1 to mmpp_1
+iarc mmpp_1 to t1_1
+oarc t2_2 to mmpp_2
+iarc mmpp_2 to t1_2
+harc mmpp_1 to t2_1
+harc mmpp_2 to t2_2
+oarc tar1 to buf1
+iarc buf1 to Er_in1
+oarc Er_in1 to Er_token1 (multi = R1)
+iarc Er_token1 to Er_trans1
+oarc Er_trans1 to Er_stage1
+iarc Er_stage1 to Er_out1 (multi = R1)
+oarc Er_out1 to buf2 (multi = dep12)
+oarc tar2 to buf2
+iarc buf2 to Er_in2
+oarc Er_in2 to Er_token2 (multi = R2)
+iarc Er_token2 to Er_trans2
+oarc Er_trans2 to Er_stage2
+iarc Er_stage2 to Er_out2 (multi = R2)
+harc Er_token1 to Er_in1
+harc Er_stage1 to Er_in1
+harc Er_token2 to Er_in2
+harc Er_stage2 to Er_in2
+
+// REWARD Functions
+
+
+ret_val1 = ifelse(#mmpp_2 != 0, lambda21, lambda22)
+Earrival = ifelse(#Er_token1 == 1, ret_val1 + r1 / mu1, ret_val1)
+
+Qlen1 = #buf1 + (#Er_token1 + #Er_stage1) / r1
+Qlen2 = #buf2 + (#Er_token2 + #Er_stage2) / r1
+
+// ret_val = ifelse(#mmpp_2 != 0, lambda21, lambda22)
+ELR = ifelse(Qlen2 + e >= K2, ifelse(#Er_token1 == 1, ret_val + r1 / mu1, ret_val), 0)
+PFull = ifelse(Qlen2 + e >= K2, 1, 0)
+
+// GUARD Functions
+gar2 = Qlen2 + e < K2
+gar1 = Qlen1 + e < K1
+
+// RATE Functions
+REr1 = r1 / mu1
+Rar1 = ifelse(#mmpp_1 != 0, lambda11, lambda12)
+REr2 = r2 / mu2
+Rar2 = ifelse(#mmpp_2 != 0, lambda21, lambda22)
+
+// CARDINALITY Functions
+R2 = r2
+dep12 = ifelse(K2 - Qlen2 + e < 1, 0, 1)
+R1 = r1

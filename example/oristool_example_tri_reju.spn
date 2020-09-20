@@ -1,0 +1,38 @@
+/*
+  ORIS Tool Example: TRI_REJU
+*/
+
+place pUp
+place pDown
+place pFProb
+place pClock
+place pRej
+
+exp tFProb
+exp tUp
+exp tDown
+exp tRej1
+exp tRej2
+
+gen tClock
+
+iarc pUp to tFProb
+iarc pUp to tRej2
+iarc pFProb to tDown
+iarc pFProb to tRej1
+iarc pDown to tUp
+harc pDown to tClock
+iarc pClock to tClock
+iarc pRej to tRej1
+iarc pRej to tRej2
+harc pRej to tFProb
+harc pRej to tDown
+
+oarc tUp to pUp
+oarc tFProb to pFProb
+oarc tDown to pDown
+oarc tClock to pRej
+oarc tRej1 to pClock
+oarc tRej1 to pUp
+oarc tRej2 to pClock
+oarc tRej2 to pUp

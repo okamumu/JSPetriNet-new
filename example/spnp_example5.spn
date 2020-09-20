@@ -1,0 +1,119 @@
+/*
+  SPNP Example 5: Database system availability
+  (P. Hiedelberger and A. Goyal,
+   Sensitivity analysis of continuous time Markov chains using uniformization,
+   Computer Performance and Reliability (G. Iazeolla, P.J. Courtois and O.J. Boxma, Eds.),
+   Elsevier Science Publishers, 1988)
+*/
+
+place mm1up (init = 1)
+place sw1up (init = 1)
+place pr1up (init = 2)
+place mm1dn
+place sw1dn
+place pr1tmp
+place pr1dn1
+place pr1dn2
+
+place mm2up (init = 1)
+place sw2up (init = 1)
+place pr2up (init = 2)
+place mm2dn
+place sw2dn
+place pr2tmp
+place pr2dn1
+place pr2dn2
+
+place dbup (init = 1)
+place dbdn
+place feup (init = 1)
+place fedn
+
+imm tpr1f1 (priority = 100, weight = coverage)
+imm tpr1f2 (priority = 100, weight = 1-coverage)
+imm tpr2f1 (priority = 100, weight = coverage)
+imm tpr2f2 (priority = 100, weight = 1-coverage)
+
+exp tmm1fl (guard = enall, rate = (1000/2400))
+exp tsw1fl (guard = enall, rate = (1000/2400))
+exp tpr1fl (guard = enall, rate = (1000/2400) * #pr1up)
+
+exp tmm1r (guard = enall, rate = 1000)
+exp tsw1r (guard = enall, rate = 1000)
+exp tpr1r (guard = enall, rate = 1000)
+
+exp tmm2fl (guard = enall, rate = (1000/2400))
+exp tsw2fl (guard = enall, rate = (1000/2400))
+exp tpr2fl (guard = enall, rate = (1000/2400) * #pr2up)
+
+exp tmm2r (guard = enall, rate = 1000)
+exp tsw2r (guard = enall, rate = 1000)
+exp tpr2r (guard = enall, rate = 1000)
+
+exp tdbfl (guard = enall, rate = (1000/2400))
+exp tfefl (guard = enall, rate = (1000/2400))
+
+iarc mm1up to tmm1fl
+oarc tmm1fl to mm1dn
+iarc sw1up to tsw1fl
+oarc tsw1fl to sw1dn
+iarc pr1up to tpr1fl
+oarc tpr1fl to pr1tmp
+iarc pr1tmp to tpr1f1
+oarc tpr1f1 to pr1dn1
+iarc pr1tmp to tpr1f2
+oarc tpr1f2 to pr1dn2
+iarc dbup to tpr1f2
+oarc tpr1f2 to dbdn
+
+iarc mm1dn to tmm1r
+oarc tmm1r to mm1up
+iarc sw1dn to tsw1r
+oarc tsw1r to sw1up
+iarc pr1dn1 to tpr1r
+oarc tpr1r to pr1up
+harc mm1dn to tpr1r
+harc mm2dn to tpr1r
+harc sw1dn to tpr1r
+harc sw2dn to tpr1r
+
+iarc mm2up to tmm2fl
+oarc tmm2fl to mm2dn
+iarc sw2up to tsw2fl
+oarc tsw2fl to sw2dn
+iarc pr2up to tpr2fl
+oarc tpr2fl to pr2tmp
+iarc pr2tmp to tpr2f1
+oarc tpr2f1 to pr2dn1
+iarc pr2tmp to tpr2f2
+oarc tpr2f2 to pr2dn2
+iarc dbup to tpr2f2
+oarc tpr2f2 to dbdn
+
+iarc mm2dn to tmm2r
+oarc tmm2r to mm2up
+iarc sw2dn to tsw2r
+oarc tsw2r to sw2up
+iarc pr2dn1 to tpr2r
+oarc tpr2r to pr2up
+harc mm1dn to tpr2r
+harc mm2dn to tpr2r
+harc sw1dn to tpr2r
+harc sw2dn to tpr2r
+
+iarc dbup to tdbfl
+oarc tdbfl to dbdn
+iarc feup to tfefl
+oarc tfefl to fedn
+
+coverage = 0.99
+
+enall.1 = #dbup == 0
+enall.2 = #feup == 0
+enall.3 = (#mm1up == 0 || #sw1up == 0 || #pr1up == 0) && (#mm2up == 0 || #sw2up == 0 || #pr2up == 0)
+reward enall !enall.1 && !enall.2 && !enall.3
+
+reliab.1 = #dbup == 0
+reliab.2 = #feup != 0
+reliab.3 = ((#mm1up == 0 || #sw1up == 0 || #pr1up == 0) && (#mm2up == 0 || #sw2up == 0 || #pr2up == 0))
+reward reliab ifelse(!reliab.1 && !reliab.2 && !reliab.3, 1, 0)

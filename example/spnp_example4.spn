@@ -1,0 +1,50 @@
+/*
+  SPNP Example 4: C.mmp system performability
+  (J. T. Blake, A. L. Reibman and K. S. Trivedi,
+   Sensitivity analysis of reliability and performability measures for multiprocessor systems,
+   Proc. 1988 ACM SIGMTRICS, 1988)
+*/
+
+place procup (init = 16)
+place procdn
+place memup (init = 16)
+place memdn
+place swup (init = 1)
+place swdn
+
+exp trpr (rate = 0.0000689 * #procup)
+exp trmm (rate = 0.000224 * #memup)
+exp trsw (rate = 0.0002202)
+
+imm trflr (priority = 100, guard = entrflr, weight = 1)
+
+iarc procup to trpr
+oarc trpr to procdn
+iarc memup to trmm
+oarc trmm to memdn
+iarc swup to trsw
+oarc trsw to swdn
+
+iarc procup to trflr (multi = apfl)
+oarc trflr to procdn (multi = apfl)
+iarc memup to trflr (multi = amfl)
+oarc trflr to memdn (multi = amfl)
+iarc swup to trflr (multi = asfl)
+oarc trflr to swdn (multi = asfl)
+
+entrflr.1 = #procup == 0 && #memup == 0 && #swup == 0
+entrflr.2 = #procup < k || #memup < k || #swup == 0
+entrflr = !entrflr.1 && entrflr.2
+
+apfl = #procup
+amfl = #memup
+asfl = #swup
+
+reliab = ifelse(#procup >= k && #memup >= k && #swup == 1, 1, 0)
+
+l = min(#procup, #memup)
+m = max(#procup, #memup)
+temp = pow(1 - (1/m), l)
+reward_rate = ifelse(#procup >= k && #memup >=k && #swup == 1, m * (1-temp), 0)
+
+k = 10

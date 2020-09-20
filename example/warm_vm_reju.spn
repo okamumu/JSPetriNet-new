@@ -1,0 +1,196 @@
+/*
+  Example: Cold-VM Rejuvenation
+  F. Machida, D.S. Kim and K.S. Trivedi,
+  Modeling and analysis of software rejuvenation in a server virtualized system with live VM migration,
+  Performance Evaluation, 68: 938-954, 2011.
+*/
+
+// VMM model
+
+place Phup (init = 1)
+place Phfp
+place Phfail
+place Phrej
+place Phdet
+
+imm Threjt (guard = ghtrig)
+imm Thfprejt (guard = ghtrig)
+
+exp Thfp
+exp Thfail
+exp Threj
+exp Threpair
+exp Thdet
+
+iarc Phup to Thfp
+iarc Phfp to Thfail
+iarc Phup to Threjt
+iarc Phfp to Thfprejt
+iarc Phrej to Threj
+iarc Phfail to Thdet
+iarc Phdet to Threpair
+
+oarc Thfp to Phfp
+oarc Threjt to Phrej
+oarc Thfprejt to Phrej
+oarc Threj to Phup
+oarc Thfail to Phfail
+oarc Thdet to Phdet
+oarc Threpair to Phup
+
+// VMM clock model
+
+place Phclock (init = 1)
+place Phpolicy
+place Phtrigger
+
+gen Thinterval (guard = ghinterval)
+imm Thpolicy (guard = ghpolicy)
+imm Threset (guard = ghreset)
+
+iarc Phclock to Thinterval
+iarc Phpolicy to Thpolicy
+iarc Phtrigger to Threset
+
+oarc Thinterval to Phpolicy
+oarc Thpolicy to Phtrigger
+oarc Threset to Phclock
+
+// VM model (warm)
+
+place Pvup (init = 1)
+place Pvfp
+place Pvfail
+place Pvdet
+place Pvrej
+
+place Pvsus
+place Pvsusd
+place Pvresm
+
+place Pvstop
+
+place Pvfpsus
+place Pvfpsusd
+place Pvfpresm
+
+imm Tvrejt (guard = gvtrig)
+imm Tvfprejt (guard = gvtrig)
+imm Tvpre (guard = gvhrej)
+imm Tvpost (guard = gvhup)
+imm Tvdw (guard = gvhdw)
+imm Tvfpdw (guard = gvhdw)
+imm Tvfppre (guard = gvhrej)
+imm Tvfppost (guard = gvhup)
+
+exp Tvfp
+exp Tvfail
+exp Tvdet (guard = gvhup)
+exp Tvrepair (guard = gvhup)
+exp Tvrej (guard = gvrej)
+
+exp Tvrestart (guard = gvhup)
+exp Tvsus
+exp Tvresm
+exp Tvfpsus
+exp Tvfpresm
+
+iarc Pvup to Tvrejt
+iarc Pvup to Tvpre
+iarc Pvup to Tvfp
+iarc Pvup to Tvdw
+
+iarc Pvfp to Tvfprejt
+iarc Pvfp to Tvfail
+iarc Pvfp to Tvfpdw
+iarc Pvfp to Tvfppre
+
+iarc Pvfail to Tvdet
+iarc Pvdet to Tvrepair
+iarc Pvrej to Tvrej
+iarc Pvsus to Tvsus
+iarc Pvsusd to Tvpost
+iarc Pvresm to Tvresm
+
+iarc Pvfpsus to Tvfpsus
+iarc Pvfpsusd to Tvfppost
+iarc Pvfpresm to Tvfpresm
+
+iarc Pvstop to Tvrestart
+
+oarc Tvfp to Pvfp
+oarc Tvrejt to Pvrej
+oarc Tvfprejt to Pvrej
+oarc Tvrej to Pvup
+oarc Tvfail to Pvfail
+oarc Tvdet to Pvdet
+oarc Tvrepair to Pvup
+
+oarc Tvpre to Pvsus
+oarc Tvsus to Pvsusd
+oarc Tvpost to Pvresm
+oarc Tvresm to Pvup
+
+oarc Tvfppre to Pvfpsus
+oarc Tvfpsus to Pvfpsusd
+oarc Tvfppost to Pvfpresm
+oarc Tvfpresm to Pvfp
+
+oarc Tvdw to Pvstop
+oarc Tvfpdw to Pvstop
+oarc Tvrestart to Pvup
+
+// VM clock model
+
+place Pvclock (init = 1)
+place Pvpolicy
+place Pvtrigger
+
+gen Tvinterval (guard = gvinterval)
+imm Tvpolicy (guard = gvpolicy)
+imm Tvreset (guard = gvreset)
+
+iarc Pvclock to Tvinterval
+iarc Pvpolicy to Tvpolicy
+iarc Pvtrigger to Tvreset
+
+oarc Tvinterval to Pvpolicy
+oarc Tvpolicy to Pvtrigger
+oarc Tvreset to Pvclock
+
+// Guard functions
+
+ghinterval = #Phup == 1 || #Phfp == 1
+ghpolicy = #Pvsusd == 1 || #Pvfpsusd == 1 || #Pvfail == 1 || #Pvdet == 1 || #Pvrej == 1
+ghreset = #Phrej == 1
+ghtrig = #Phtrigger == 1
+ghrej = #Phclock == 1
+
+gvinterval = #Pvup == 1 || #Pvfp == 1 || #Pvsusd == 1 || #Pvfpsusd == 1
+gvpolicy = #Pvup == 1 || #Pvfp == 1
+gvreset = #Pvrej == 1
+gvtrig = #Pvtrigger == 1
+gvrej = #Pvclock == 1 && (#Phup == 1 || #Phfp == 1)
+gvhup = #Phup == 1 || #Phfp == 1
+gvhrej = #Phpolicy == 1
+gvhdw = #Phfail == 1
+
+// Parameters
+
+Thfp.rate = 1/(1*30*24*60*60)  // 1 month
+Thfail.rate = 1/(1*7*24*60*60) // 1 week
+Thdet.rate = 1/(5*60)          // 5 minutes
+Threpair.rate = 1/(1*60*60)    // 1 hour
+Threj.rate = 1/(2*60)         // 2 minutes
+Tvfp.rate = 1/(1*7*24*60*60)   // 1 week
+Tvfail.rate = 1/(3*24*60*60)   // 3 days
+Tvdet.rate = 1/(5*60)          // 5 minutes
+Tvrepair.rate = 1/(30*60)      // 30 minutes
+Tvrej.rate = 1/(1*60)         // 1 minutes
+Tvsd.rate = 1/30               // 30 seconds
+Tvfpsd.rate = 1/30             // 30 seconds
+Tvrestart.rate = 1/30          // 30 seconds
+Tvsus.rate = 1/0.08            // 0.08 seconds
+Tvfpsus.rate = 1/0.08          // 0.08 seconds
+Tvresm.rate = 1/0.8            // 0.8 seconds
+Tvfpresm.rate = 1/0.8          // 0.8 seconds

@@ -1,0 +1,60 @@
+/*
+  SPNP Example 13: Reader and writer sharing buffer
+*/
+
+/*
+  Initial tokes are given by an option imark
+  Example:
+   - The number of total processes is 3
+   - The number of max reading processes is 2
+
+  In the above case, the imark option should be
+     -imark "p0:3,p5:2,pk:2"
+*/
+
+// set default values
+
+n = 3 // Total processes
+k = 2 // Max reading processes
+
+place p0 (init = n)
+place p1
+place p2
+place p3
+place p4
+place p5 (init = k)
+place pk (init = k)
+
+exp t0 (rate = 4.0)
+gen t1 (dist = unif(1.0, 2.0), policy = "prs")
+gen t2 (dist = tnorm(2.0, 0.5), policy = "prd")
+exp t3 (rate = 1.0)
+gen t4 (dist = unif(1.0, 2.0))
+gen t5 (dist = tnorm(3.0, 1.0))
+imm t6 (guard = gun)
+
+iarc p0 to t0
+oarc t0 to p1
+iarc p1 to t1
+iarc p5 to t1
+oarc t1 to p2
+harc p3 to t1
+iarc p2 to t2
+oarc t2 to p0
+oarc t2 to p5
+iarc p0 to t3
+oarc t3 to p3
+iarc p3 to t4
+iarc p5 to t4 (multi = #pk) // (multi = k)
+oarc t4 to p4
+iarc p4 to t5
+oarc t5 to p0
+oarc t5 to p5 (multi = #pk) // (multi = k)
+iarc p2 to t6 (multi = fun)
+oarc t6 to p5 (multi = fun)
+oarc t6 to p0 (multi = fun)
+
+fun = #p2
+gun := #p3 > 0 && #p2 > 0
+
+eff = ifelse(#p2 >= 6, 1, 0)

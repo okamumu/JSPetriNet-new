@@ -1,0 +1,40 @@
+/*
+  SPNP Example 7: Criticality Importance and Birnbaum Importance
+  (R.M. Fricks and K.S. Trivedi,
+   On computing importance measures using reward models,
+   VII Simposio de Computadores Tolerantes a Falhas (VII SCTF), 169-183, 1997)
+*/
+
+// node("t1", "p1", 0.001)
+place p1
+exp t1 (rate = 0.001)
+oarc t1 to p1
+harc p1 to t1
+
+// node("t2", "p2", 0.002)
+place p2
+exp t2 (rate = 0.002)
+oarc t2 to p2
+harc p2 to t2
+
+// node("t3", "p3", 0.003)
+place p3
+exp t3 (rate = 0.003)
+oarc t3 to p3
+harc p3 to t3
+
+/* REARD RATE FUNCTIONS */
+
+// Criticality
+Q1 = ifelse(#p1 == 1, 1, 0)
+Q2 = ifelse(#p2 == 1, 1, 0)
+Q3 = ifelse(#p3 == 1, 1, 0)
+Q = ifelse(Q1 + Q2 + Q3 >= 2, 1, 0)
+
+// Birnbaum
+g11 = ifelse(1 + Q2 + Q3 >= 2, 1, 0)
+g10 = ifelse(0 + Q2 + Q3 >= 2, 1, 0)
+g21 = ifelse(Q1 + 1 + Q3 >= 2, 1, 0)
+g20 = ifelse(Q1 + 0 + Q3 >= 2, 1, 0)
+g31 = ifelse(Q1 + Q2 + 1 >= 2, 1, 0)
+g30 = ifelse(Q1 + Q2 + 0 >= 2, 1, 0)

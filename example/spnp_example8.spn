@@ -1,0 +1,60 @@
+/*
+  SPNP Example 8: Channel recovery scheme in a cellular network
+  (Y. Ma, C.W. Ro and K.S. Trivedi,
+   Performability analysis of channel allocation with channel recovery strategy in cellular network,
+   Proc. IEEE 1998 Int Conf on Unversal Personal Communications (ICUPC98), 1998)
+*/
+
+t_channel = 28
+g_c = 1
+lam_n = 10           // New call arrival rate
+lam_h_o = 0.33       // handoff every 5 minutes
+lam_h_i = 0.2        // handoff_in rate
+lam_d = 0.5          //  call duration: 120 seconds
+lam_f = 0.00001677
+mu_r = 0.0167
+
+place T
+place B
+place R
+place CP (init = t_channel)
+
+// timed trans
+exp t_n (rate = lam_n)
+exp t_h_i (rate = lam_h_i)
+exp t_d (rate = lam_d * #T)
+exp t_f (rate = lam_f * #T)
+exp t_h_o (rate = lam_h_o * #T)
+exp t_r (rate = mu_r)
+
+// immed trans
+imm t_1 (priority = 100, weight = 1)
+
+// ARC form timed trans
+iarc CP to t_n (multi = g_c + 1)
+oarc t_n to T
+oarc t_n to CP (multi = g_c)
+iarc CP to t_h_i
+oarc t_h_i to T
+iarc T to t_h_o
+oarc t_h_o to CP
+iarc T to t_d
+oarc t_d to CP
+iarc T to t_f
+oarc t_f to B
+oarc t_f to R
+iarc R to t_r
+oarc t_r to CP
+
+// ARC for immediate trans
+iarc B to t_1
+iarc CP to t_1
+oarc t_1 to T
+
+// REWARD Functions
+BH = ifelse(#CP == 0, 1, 0)
+BN = ifelse(#CP <= g_c, 1, 0)
+ACh = #CP
+hotput = t_h_o.rate
+ftput = t_f.rate
+fnum = #B
